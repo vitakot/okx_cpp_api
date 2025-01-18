@@ -9,7 +9,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #ifndef INCLUDE_VK_OKX_FUTURES_WS_CLIENT_H
 #define INCLUDE_VK_OKX_FUTURES_WS_CLIENT_H
 
-#include <vk/tools/log_utils.h>
+#include <vk/utils/log_utils.h>
 #include "okx_futures_ws_session.h"
 #include <string>
 

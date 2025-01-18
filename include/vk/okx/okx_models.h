@@ -9,7 +9,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #ifndef INCLUDE_VK_OKX_MODELS_H
 #define INCLUDE_VK_OKX_MODELS_H
 
-#include "vk/tools/i_json.h"
+#include "vk/interface/i_json.h"
 #include <nlohmann/json.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
 

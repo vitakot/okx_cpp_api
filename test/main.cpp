@@ -1,6 +1,6 @@
 #include "vk/okx/okx_futures_rest_client.h"
-#include "vk/tools/json_utils.h"
-#include "vk/tools/log_utils.h"
+#include "vk/utils/json_utils.h"
+#include "vk/utils/log_utils.h"
 #include "vk/okx/okx_ws_stream_manager.h"
 #include <spdlog/spdlog.h>
 #include <filesystem>

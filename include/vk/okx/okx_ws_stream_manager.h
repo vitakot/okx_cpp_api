@@ -9,7 +9,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #ifndef INCLUDE_VK_OKX_FUTURES_WS_STREAM_MANAGER_H
 #define INCLUDE_VK_OKX_FUTURES_WS_STREAM_MANAGER_H
 
-#include "vk/tools/log_utils.h"
+#include "vk/utils/log_utils.h"
 #include "okx_event_models.h"
 #include "okx_models.h"
 #include <optional>
