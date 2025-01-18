@@ -9,7 +9,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/okx/okx_futures_rest_client.h"
 #include "vk/okx/okx_http_session.h"
 #include "vk/okx/okx.h"
-#include "vk/tools/utils.h"
+#include "vk/utils/utils.h"
 #include <fmt/format.h>
 #include <mutex>
 #include <magic_enum.hpp>

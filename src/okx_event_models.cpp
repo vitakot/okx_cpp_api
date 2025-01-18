@@ -7,8 +7,8 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 */
 
 #include "vk/okx/okx_event_models.h"
-#include "vk/tools/utils.h"
-#include "vk/tools/json_utils.h"
+#include "vk/utils/utils.h"
+#include "vk/utils/json_utils.h"
 
 namespace vk::okx::futures {
 nlohmann::json WSSubscription::toJson() const {

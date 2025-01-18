@@ -7,8 +7,8 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 */
 
 #include "vk/okx/okx_models.h"
-#include "vk/tools/utils.h"
-#include "vk/tools/json_utils.h"
+#include "vk/utils/utils.h"
+#include "vk/utils/json_utils.h"
 #include "vk/okx/okx.h"
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <utility>

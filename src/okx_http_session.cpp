@@ -7,7 +7,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 */
 
 #include "vk/okx/okx_http_session.h"
-#include "vk/tools/utils.h"
+#include "vk/utils/utils.h"
 #include "nlohmann/json.hpp"
 #include <boost/asio/ssl.hpp>
 #include <boost/beast/version.hpp>

@@ -9,7 +9,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #ifndef INCLUDE_VK_OKX_WS_SESSION_H
 #define INCLUDE_VK_OKX_WS_SESSION_H
 
-#include "vk/tools/log_utils.h"
+#include "vk/utils/log_utils.h"
 #include <memory>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/core.hpp>
