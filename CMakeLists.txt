@@ -2,15 +2,17 @@ cmake_minimum_required(VERSION 3.20)
 project(okx_api)
 
 set(CMAKE_CXX_STANDARD 20)
+
 if (MSVC)
     add_definitions(-D_WIN32_WINNT=0x0A00 /bigobj)
+else ()
+    add_definitions(-fPIC)
 endif ()
 
 if (POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif ()
 
-add_definitions(-fPIC)
 
 find_package(Boost 1.83 REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -50,7 +52,6 @@ else ()
     add_library(okx_api STATIC ${SOURCES} ${HEADERS})
 endif ()
 
-set_target_properties(okx_api PROPERTIES POSITION_INDEPENDENT_CODE 1)
 target_link_libraries(okx_api PRIVATE OpenSSL::Crypto OpenSSL::SSL vk_common nlohmann_json::nlohmann_json)
 target_compile_definitions(okx_api PUBLIC VERBOSE_LOG)
 
