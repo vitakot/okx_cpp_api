@@ -13,7 +13,6 @@ if (POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif ()
 
-
 find_package(Boost 1.83 REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
@@ -47,13 +46,12 @@ set(SOURCES
         src/okx_http_session.cpp)
 
 if (MODULE_MANAGER)
-    add_library(okx_api MODULE ${SOURCES} ${HEADERS})
+    add_library(okx_api SHARED ${SOURCES} ${HEADERS})
 else ()
     add_library(okx_api STATIC ${SOURCES} ${HEADERS})
+
+    add_executable(okx_test test/main.cpp)
+    target_link_libraries(okx_test PRIVATE spdlog::spdlog_header_only okx_api)
 endif ()
 
 target_link_libraries(okx_api PRIVATE OpenSSL::Crypto OpenSSL::SSL vk_common nlohmann_json::nlohmann_json)
-target_compile_definitions(okx_api PUBLIC VERBOSE_LOG)
-
-add_executable(okx_test test/main.cpp)
-target_link_libraries(okx_test PRIVATE spdlog::spdlog_header_only okx_api)
