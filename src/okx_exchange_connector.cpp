@@ -73,4 +73,8 @@ std::vector<FundingRate> OKXFuturesExchangeConnector::getFundingRates(
 std::vector<Ticker> OKXFuturesExchangeConnector::getTickerInfo(const std::string& symbol) const {
     throw std::runtime_error("Unimplemented: OKXFuturesExchangeConnector::getTickerInfo");
 }
+
+std::int64_t OKXFuturesExchangeConnector::getServerTime() const {
+    return m_p->restClient->getSystemTime();
+}
 }

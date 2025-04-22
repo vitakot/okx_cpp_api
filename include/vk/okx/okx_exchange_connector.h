@@ -46,6 +46,8 @@ public:
 
     [[nodiscard]] std::vector<Ticker> getTickerInfo(const std::string& symbol) const override;
 
+    [[nodiscard]] std::int64_t getServerTime() const override;
+
     static std::shared_ptr<IExchangeConnector> createInstance() {
         return std::make_shared<OKXFuturesExchangeConnector>();
     }
