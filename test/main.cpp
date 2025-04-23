@@ -6,6 +6,10 @@
 #include <filesystem>
 #include <iostream>
 #include <fstream>
+#include <future>
+
+#include "vk/interface/exchange_types.h"
+#include "vk/utils/semaphore.h"
 
 using namespace vk::okx;
 using namespace std::chrono_literals;
@@ -212,18 +216,29 @@ void testOrders() {
 
 void testFr() {
     try {
+        using std::chrono::high_resolution_clock;
+        using std::chrono::duration_cast;
+        using std::chrono::duration;
+        using std::chrono::milliseconds;
+
         std::string apiSecret;
         std::string passPhrase;
         std::string apiKey;
         readCredentials(apiKey, apiSecret, passPhrase);
         const auto restClient = std::make_shared<futures::RESTClient>(apiKey, apiSecret, passPhrase);
 
-        auto instruments = restClient->getInstruments(InstrumentType::SWAP);
+        const auto instruments = restClient->getInstruments(InstrumentType::SWAP);
 
         std::vector<FundingRate> fRates;
 
-        for (const auto instId : instruments) {
+        for (const auto& instId : instruments) {
+            auto t1 = high_resolution_clock::now();
             auto fr = restClient->getLastFundingRate(instId.m_instId);
+            auto t2 = high_resolution_clock::now();
+
+            duration<double, std::milli> ms_double = t2 - t1;
+            logFunction(vk::LogSeverity::Info,
+                        fmt::format("Get Last Funding Rate request time: {} ms", ms_double.count()));
             fRates.push_back(fr);
         }
     }
@@ -232,8 +247,97 @@ void testFr() {
     }
 }
 
+std::thread m_workerThread;
+
+std::vector<vk::FundingRate> parallelFR() {
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
+
+    const auto restClient = std::make_shared<futures::RESTClient>("", "", "");
+    const auto instruments = restClient->getInstruments(InstrumentType::SWAP);
+
+    std::vector<std::future<vk::FundingRate>> futures;
+    std::vector<vk::FundingRate> readyFutures;
+
+    constexpr int numJobs = 3;
+    Semaphore m_maxConcurrentJobs{numJobs};
+    int requestsDone = 0;
+
+    auto t1 = high_resolution_clock::now();
+
+    for (const auto& instrument : instruments) {
+        spdlog::info("Getting FR for: {}...", instrument.m_instId);
+
+        futures.push_back(
+            std::async(std::launch::async,
+                       [restClient, &requestsDone, t1
+                       ](const std::string& instId, Semaphore& maxJobs) -> vk::FundingRate {
+                           std::scoped_lock w(maxJobs);
+
+                           /// https://www.okx.com/docs-v5/en/#public-data-rest-api-get-funding-rate
+                           constexpr double minMsPerRequest =  (2.0 / 20.0 * 1000.0) * 1.15;
+
+                           const auto t1Fr = high_resolution_clock::now();
+                           const auto fr = restClient->getLastFundingRate(instId);
+                           const auto t2Fr = high_resolution_clock::now();
+
+                           if (const duration<double, std::milli> msFr = t2Fr - t1Fr; msFr.count() < minMsPerRequest) {
+                               spdlog::info("Adding sleep: {} ms ", static_cast<int>(minMsPerRequest - msFr.count()));
+                               std::this_thread::sleep_for(
+                                   milliseconds(static_cast<int>(minMsPerRequest - msFr.count())));
+                           }
+
+                           vk::FundingRate fundingRate = {
+                               fr.m_instId, fr.m_fundingRate.convert_to<double>(), fr.m_nextFundingTime
+                           };
+
+                           requestsDone++;
+                           const auto t2 = high_resolution_clock::now();
+                           const duration<double, std::milli> ms = t2 - t1;
+
+                           const auto speed = requestsDone / ms.count();
+                           spdlog::info("Speed: {} requests per second", speed * 1000.0);
+
+                           return fundingRate;
+                       }, instrument.m_instId, std::ref(m_maxConcurrentJobs)));
+    }
+
+    do {
+        for (auto& future : futures) {
+            if (isReady(future)) {
+                readyFutures.push_back(future.get());
+                spdlog::info("Got FR for: {}, value : {}", readyFutures.back().symbol,
+                             readyFutures.back().fundingRate);
+            }
+        }
+    }
+    while (readyFutures.size() < futures.size());
+
+    return readyFutures;
+}
+
+std::vector<vk::FundingRate> result;
+
+void parallelFRTest() {
+
+
+    if (m_workerThread.joinable()) {
+        m_workerThread.join();
+    }
+
+    m_workerThread = std::thread([&]() {
+        result = parallelFR();
+    });
+}
+
 int main() {
-    testFr();
+    parallelFRTest();
+    parallelFRTest();
+    parallelFRTest();
+    parallelFRTest();
+    parallelFRTest();
     //testOrders();
     return getchar();
 }

@@ -13,6 +13,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <fmt/format.h>
 #include <mutex>
 #include <magic_enum.hpp>
+#include <thread>
 
 namespace vk::okx::futures {
 template<typename ValueType>
@@ -173,13 +174,16 @@ RESTClient::getHistoricalPrices(const std::string &instId, const BarSize barSize
 }
 
 FundingRate RESTClient::getLastFundingRate(const std::string &instId) const {
-    const std::string path = "/api/v5/public/funding-rate";
-    std::map<std::string, std::string> parameters;
-
-    parameters.insert_or_assign("instId", instId);
-
-    const auto response = P::checkResponse(m_p->m_httpSession->get(path, parameters));
-    return handleOKXResponse<FundingRate>(response);
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(35ms);
+    // const std::string path = "/api/v5/public/funding-rate";
+    // std::map<std::string, std::string> parameters;
+    //
+    // parameters.insert_or_assign("instId", instId);
+    //
+    // const auto response = P::checkResponse(m_p->m_httpSession->get(path, parameters));
+    // return handleOKXResponse<FundingRate>(response);
+    return {};
 }
 
 std::vector<FundingRate>
