@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 */
 
-#include <vk/okx/okx_exchange_connector.h>
+#include <vk/okx/okx_futures_exchange_connector.h>
 #include "vk/okx/okx_futures_rest_client.h"
 
 namespace vk {
@@ -54,14 +54,12 @@ Balance OKXFuturesExchangeConnector::getAccountBalance(const std::string& curren
     throw std::runtime_error("Unimplemented: OKXFuturesExchangeConnector::getAccountBalance");
 }
 
-FundingRate OKXFuturesExchangeConnector::getLastFundingRate(const std::string& symbol) const {
-    // const auto fr = m_p->restClient->getLastFundingRate(symbol);
-    // return {fr.m_symbol, fr.m_fundingRate, fr.m_fundingTime};
-    return {};
+FundingRate OKXFuturesExchangeConnector::getFundingRate(const std::string& symbol) const {
+    const auto fr = m_p->restClient->getLastFundingRate(symbol);
+    return {fr.m_instId, fr.m_fundingRate.convert_to<double>(), fr.m_nextFundingTime};
 }
 
-std::vector<FundingRate> OKXFuturesExchangeConnector::getFundingRates(
-    const std::string& symbol, const std::int64_t startTime, const std::int64_t endTime) const {
+std::vector<FundingRate> OKXFuturesExchangeConnector::getFundingRates() const {
     std::vector<FundingRate> retVal;
     //
     // for (const auto fRates = m_p->restClient->getFundingRates(symbol, startTime, endTime); const auto& fr: fRates) {
