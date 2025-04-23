@@ -12,30 +12,30 @@ using namespace std::chrono_literals;
 
 constexpr int HISTORY_LENGTH_IN_S = 86400; // 1 day
 
-void logFunction(const vk::LogSeverity severity, const std::string &errmsg) {
+void logFunction(const vk::LogSeverity severity, const std::string& errmsg) {
     switch (severity) {
-        case vk::LogSeverity::Info:
-            spdlog::info(errmsg);
-            break;
-        case vk::LogSeverity::Warning:
-            spdlog::warn(errmsg);
-            break;
-        case vk::LogSeverity::Critical:
-            spdlog::critical(errmsg);
-            break;
-        case vk::LogSeverity::Error:
-            spdlog::error(errmsg);
-            break;
-        case vk::LogSeverity::Debug:
-            spdlog::debug(errmsg);
-            break;
-        case vk::LogSeverity::Trace:
-            spdlog::trace(errmsg);
-            break;
+    case vk::LogSeverity::Info:
+        spdlog::info(errmsg);
+        break;
+    case vk::LogSeverity::Warning:
+        spdlog::warn(errmsg);
+        break;
+    case vk::LogSeverity::Critical:
+        spdlog::critical(errmsg);
+        break;
+    case vk::LogSeverity::Error:
+        spdlog::error(errmsg);
+        break;
+    case vk::LogSeverity::Debug:
+        spdlog::debug(errmsg);
+        break;
+    case vk::LogSeverity::Trace:
+        spdlog::trace(errmsg);
+        break;
     }
 }
 
-void readCredentials(std::string &apiKey, std::string &apiSecret, std::string &passPhrase) {
+void readCredentials(std::string& apiKey, std::string& apiSecret, std::string& passPhrase) {
     std::filesystem::path pathToCfg{"PATH_TO_CONFIG_FILE"};
     std::ifstream ifs(pathToCfg.string());
 
@@ -48,7 +48,8 @@ void readCredentials(std::string &apiKey, std::string &apiSecret, std::string &p
         vk::readValue<std::string>(json, "ApiKey", apiKey);
         vk::readValue<std::string>(json, "ApiSecret", apiSecret);
         vk::readValue<std::string>(json, "PassPhrase", passPhrase);
-    } catch (const std::exception &e) {
+    }
+    catch (const std::exception& e) {
         std::cerr << e.what();
         ifs.close();
     }
@@ -64,7 +65,8 @@ void testData() {
         const auto nowTimestamp = std::chrono::seconds(std::time(nullptr)).count() * 1000;
         const auto oldestDate = (std::chrono::seconds(std::time(nullptr)).count() - 60 * 200) * 1000;
         auto candles = restClient->getHistoricalPrices("ETH-USDT-SWAP", BarSize::_1m, oldestDate, nowTimestamp);
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e) {
         logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
@@ -132,8 +134,9 @@ void testData() {
             if (const auto ret = wsManager->readEventInstrumentInfo("ADA-USDT")) {
                 std::cout << fmt::format("ADA ask price: {}, bid price: {}", ret->m_tickers[0].m_askPx.str(),
                                          ret->m_tickers[0].m_bidPx.str())
-                        << std::endl;
-            } else {
+                    << std::endl;
+            }
+            else {
                 std::cout << "Error" << std::endl;
             }
         }
@@ -149,7 +152,8 @@ void testBalance() {
         readCredentials(apiKey, apiSecret, passPhrase);
         const auto restClient = std::make_shared<futures::RESTClient>(apiKey, apiSecret, passPhrase);
         auto balance = restClient->getBalance("");
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e) {
         logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
@@ -162,7 +166,8 @@ void testInstruments() {
         readCredentials(apiKey, apiSecret, passPhrase);
         const auto restClient = std::make_shared<futures::RESTClient>(apiKey, apiSecret, passPhrase);
         auto instruments = restClient->getInstruments(InstrumentType::MARGIN);
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e) {
         logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
@@ -175,7 +180,8 @@ void testPositions() {
         readCredentials(apiKey, apiSecret, passPhrase);
         const auto restClient = std::make_shared<futures::RESTClient>(apiKey, apiSecret, passPhrase);
         auto positions = restClient->getPositions(InstrumentType::MARGIN, "ADA-USDT");
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e) {
         logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
@@ -198,12 +204,36 @@ void testOrders() {
         order.m_ccy = "USDT";
 
         auto orderResponses = restClient->placeOrder(order);
-    } catch (std::exception &e) {
+    }
+    catch (std::exception& e) {
+        logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
+    }
+}
+
+void testFr() {
+    try {
+        std::string apiSecret;
+        std::string passPhrase;
+        std::string apiKey;
+        readCredentials(apiKey, apiSecret, passPhrase);
+        const auto restClient = std::make_shared<futures::RESTClient>(apiKey, apiSecret, passPhrase);
+
+        auto instruments = restClient->getInstruments(InstrumentType::SWAP);
+
+        std::vector<FundingRate> fRates;
+
+        for (const auto instId : instruments) {
+            auto fr = restClient->getLastFundingRate(instId.m_instId);
+            fRates.push_back(fr);
+        }
+    }
+    catch (std::exception& e) {
         logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
 
 int main() {
-    testOrders();
+    testFr();
+    //testOrders();
     return getchar();
 }

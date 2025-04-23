@@ -19,7 +19,7 @@ namespace vk::okx {
 namespace ssl = boost::asio::ssl;
 using tcp = net::ip::tcp;
 
-auto API_MAINNET_URI = "aws.okx.com";
+auto API_MAINNET_URI = "www.okx.com";
 
 struct HTTPSession::P {
     net::io_context m_ioc;

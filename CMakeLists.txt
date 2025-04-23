@@ -34,7 +34,7 @@ set(HEADERS
         include/vk/okx/okx_futures_ws_client.h
         include/vk/okx/okx_futures_ws_session.h
         include/vk/okx/okx_ws_stream_manager.h
-        include/vk/okx/okx_exchange_connector.h)
+        include/vk/okx/okx_futures_exchange_connector.h)
 
 set(SOURCES
         src/okx.cpp
@@ -45,7 +45,7 @@ set(SOURCES
         src/okx_models.cpp
         src/okx_futures_rest_client.cpp
         src/okx_http_session.cpp
-        src/okx_exchange_connector.cpp)
+        src/okx_futures_exchange_connector.cpp)
 
 if (MODULE_MANAGER)
     add_library(okx_api SHARED ${SOURCES} ${HEADERS})
