@@ -12,8 +12,13 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/utils/utils.h"
 #include <fmt/format.h>
 #include <mutex>
-#include <magic_enum.hpp>
 #include <thread>
+
+#ifdef _WIN32
+#include "magic_enum/magic_enum.hpp"
+#else
+#include "magic_enum.hpp"
+#endif
 
 namespace vk::okx::futures {
 template<typename ValueType>
