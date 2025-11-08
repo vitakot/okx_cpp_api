@@ -12,7 +12,6 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/okx/okx.h"
 #include <mutex>
 #include <thread>
-#include <fmt/format.h>
 #include <magic_enum.hpp>
 
 using namespace std::chrono_literals;
