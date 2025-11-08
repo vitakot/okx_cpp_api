@@ -9,7 +9,6 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/okx/okx_futures_ws_client.h"
 #include <boost/beast/core.hpp>
 #include <thread>
-#include <fmt/format.h>
 
 using namespace std::chrono_literals;
 
