@@ -17,7 +17,7 @@ using std::chrono::milliseconds;
 
 namespace vk {
 struct OKXFuturesExchangeConnector::P {
-    std::shared_ptr<okx::futures::RESTClient> m_restClient{};
+    std::unique_ptr<okx::futures::RESTClient> m_restClient{};
     std::vector<FundingRate> m_fundingRates;
     std::thread m_workerThread;
     std::atomic_bool m_isRunning{false};
@@ -89,6 +89,7 @@ struct OKXFuturesExchangeConnector::P {
 };
 
 OKXFuturesExchangeConnector::OKXFuturesExchangeConnector() : m_p(std::make_unique<P>()) {
+    m_p->m_restClient = std::make_unique<okx::futures::RESTClient>("","","");
 }
 
 OKXFuturesExchangeConnector::~OKXFuturesExchangeConnector() {
@@ -112,7 +113,7 @@ void OKXFuturesExchangeConnector::setLoggerCallback(const onLogMessage& onLogMes
 
 void OKXFuturesExchangeConnector::login(const std::tuple<std::string, std::string, std::string>& credentials) {
     m_p->m_restClient.reset();
-    m_p->m_restClient = std::make_shared<okx::futures::RESTClient>(std::get<0>(credentials),
+    m_p->m_restClient = std::make_unique<okx::futures::RESTClient>(std::get<0>(credentials),
                                                                    std::get<1>(credentials),
                                                                    std::get<2>(credentials));
 }
