@@ -11,12 +11,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 
 #include "vk/okx/okx_models.h"
 #include "vk/okx/okx_event_models.h"
-
-#ifdef _WIN32
-#include "magic_enum/magic_enum.hpp"
-#else
-#include "magic_enum/magic_enum.hpp"
-#endif
+#include "vk/utils/magic_enum_wrapper.hpp"
 
 namespace vk::okx {
     class OKX {

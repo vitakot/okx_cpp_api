@@ -10,14 +10,9 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/okx/okx_http_session.h"
 #include "vk/okx/okx.h"
 #include "vk/utils/utils.h"
+#include "vk/utils/magic_enum_wrapper.hpp"
 #include <mutex>
 #include <thread>
-
-#ifdef _WIN32
-#include "magic_enum/magic_enum.hpp"
-#else
-#include "magic_enum/magic_enum.hpp"
-#endif
 
 namespace vk::okx::futures {
 template<typename ValueType>
