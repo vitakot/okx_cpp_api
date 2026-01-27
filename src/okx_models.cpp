@@ -9,7 +9,6 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/okx/okx_models.h"
 #include "vk/utils/utils.h"
 #include "vk/utils/json_utils.h"
-#include "vk/okx/okx.h"
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <utility>
 
@@ -30,15 +29,15 @@ readDecimalValue(const nlohmann::json &json, const std::string &key, boost::mult
 
 nlohmann::json Response::toJson() const {
     nlohmann::json json;
-    json["code"] = m_code;
-    json["msg"] = m_msg;
+    json["code"] = code;
+    json["msg"] = msg;
     return json;
 }
 
 void Response::fromJson(const nlohmann::json &json) {
-    readValue<std::string>(json, "code", m_code);
-    readValue<std::string>(json, "msg", m_msg);
-    m_data = json["data"];
+    readValue<std::string>(json, "code", code);
+    readValue<std::string>(json, "msg", msg);
+    data = json["data"];
 }
 
 nlohmann::json Ticker::toJson() const {
@@ -46,23 +45,23 @@ nlohmann::json Ticker::toJson() const {
 }
 
 void Ticker::fromJson(const nlohmann::json &json) {
-    readMagicEnum<InstrumentType>(json, "instType", m_instType);
-    readValue<std::string>(json, "instId", m_instId);
-    readDecimalValue(json, "last", m_last);
-    readDecimalValue(json, "lastSz", m_lastSz);
-    readDecimalValue(json, "askPx", m_askPx);
-    readDecimalValue(json, "askSz", m_askSz);
-    readDecimalValue(json, "bidPx", m_bidPx);
-    readDecimalValue(json, "bidSz", m_bidSz);
-    readDecimalValue(json, "open24h", m_open24h);
-    readDecimalValue(json, "high24h", m_high24h);
-    readDecimalValue(json, "low24h", m_low24h);
-    readDecimalValue(json, "volCcy24h", m_volCcy24h);
-    readDecimalValue(json, "vol24h", m_vol24h);
-    readDecimalValue(json, "sodUtc0", m_sodUtc0);
-    readDecimalValue(json, "sodUtc8", m_sodUtc8);
-    readDecimalValue(json, "vol24h", m_vol24h);
-    m_ts = readStringAsInt64(json, "ts");
+    readMagicEnum<InstrumentType>(json, "instType", instType);
+    readValue<std::string>(json, "instId", instId);
+    readDecimalValue(json, "last", last);
+    readDecimalValue(json, "lastSz", lastSz);
+    readDecimalValue(json, "askPx", askPx);
+    readDecimalValue(json, "askSz", askSz);
+    readDecimalValue(json, "bidPx", bidPx);
+    readDecimalValue(json, "bidSz", bidSz);
+    readDecimalValue(json, "open24h", open24h);
+    readDecimalValue(json, "high24h", high24h);
+    readDecimalValue(json, "low24h", low24h);
+    readDecimalValue(json, "volCcy24h", volCcy24h);
+    readDecimalValue(json, "vol24h", vol24h);
+    readDecimalValue(json, "sodUtc0", sodUtc0);
+    readDecimalValue(json, "sodUtc8", sodUtc8);
+    readDecimalValue(json, "vol24h", vol24h);
+    ts = readStringAsInt64(json, "ts");
 }
 
 nlohmann::json Tickers::toJson() const {
@@ -72,10 +71,10 @@ nlohmann::json Tickers::toJson() const {
 void Tickers::fromJson(const nlohmann::json &json) {
     Response::fromJson(json);
 
-    for (const auto &el: m_data.items()) {
+    for (const auto &el: data.items()) {
         Ticker ticker;
         ticker.fromJson(el.value());
-        m_tickers.push_back(ticker);
+        tickers.push_back(ticker);
     }
 }
 
@@ -84,15 +83,15 @@ nlohmann::json Candle::toJson() const {
 }
 
 void Candle::fromJson(const nlohmann::json &json) {
-    m_ts = stoll(json[0].get<std::string>());
-    m_o = boost::multiprecision::cpp_dec_float_50(json[1].get<std::string>());
-    m_h = boost::multiprecision::cpp_dec_float_50(json[2].get<std::string>());
-    m_l = boost::multiprecision::cpp_dec_float_50(json[3].get<std::string>());
-    m_c = boost::multiprecision::cpp_dec_float_50(json[4].get<std::string>());
-    m_vol = boost::multiprecision::cpp_dec_float_50(json[5].get<std::string>());
-    m_volCcy = boost::multiprecision::cpp_dec_float_50(json[6].get<std::string>());
-    m_volCcyQuote = boost::multiprecision::cpp_dec_float_50(json[7].get<std::string>());
-    m_confirm = string2bool(json[8].get<std::string>());
+    ts = stoll(json[0].get<std::string>());
+    o = boost::multiprecision::cpp_dec_float_50(json[1].get<std::string>());
+    h = boost::multiprecision::cpp_dec_float_50(json[2].get<std::string>());
+    l = boost::multiprecision::cpp_dec_float_50(json[3].get<std::string>());
+    c = boost::multiprecision::cpp_dec_float_50(json[4].get<std::string>());
+    vol = boost::multiprecision::cpp_dec_float_50(json[5].get<std::string>());
+    volCcy = boost::multiprecision::cpp_dec_float_50(json[6].get<std::string>());
+    volCcyQuote = boost::multiprecision::cpp_dec_float_50(json[7].get<std::string>());
+    confirm = string2bool(json[8].get<std::string>());
 }
 
 nlohmann::json Candles::toJson() const {
@@ -102,10 +101,10 @@ nlohmann::json Candles::toJson() const {
 void Candles::fromJson(const nlohmann::json &json) {
     Response::fromJson(json);
 
-    for (const auto &el: m_data.items()) {
+    for (const auto &el: data.items()) {
         Candle candle;
         candle.fromJson(el.value());
-        m_candles.push_back(candle);
+        candles.push_back(candle);
     }
 }
 
@@ -116,20 +115,27 @@ nlohmann::json FundingRate::toJson() const {
 void FundingRate::fromJson(const nlohmann::json &json) {
     if (json.contains("data")) {
         Response::fromJson(json);
-        if (!m_data.empty()) {
-            m_data = m_data[0];
+        if (!data.empty()) {
+            data = data[0];
         }
     } else {
-        m_data = json;
+        data = json;
     }
 
-    if (!m_data.empty()) {
-        readMagicEnum<InstrumentType>(m_data, "instType", m_instType);
-        readValue<std::string>(m_data, "instId", m_instId);
-        readDecimalValue(m_data, "fundingRate", m_fundingRate);
-        m_fundingTime = readStringAsInt64(m_data, "fundingTime");
-        m_nextFundingTime = readStringAsInt64(m_data, "nextFundingTime");
-        readDecimalValue(m_data, "nextFundingRate", m_nextFundingRate);
+    if (!data.empty()) {
+        readMagicEnum<InstrumentType>(data, "instType", instType);
+        readValue<std::string>(data, "instId", instId);
+        readDecimalValue(data, "fundingRate", fundingRate);
+        fundingTime = readStringAsInt64(data, "fundingTime");
+        nextFundingTime = readStringAsInt64(data, "nextFundingTime");
+        readDecimalValue(data, "nextFundingRate", nextFundingRate);
+        readDecimalValue(data, "interestRate", interestRate);
+        readDecimalValue(data, "premium", premium);
+        readDecimalValue(data, "maxFundingRate", maxFundingRate);
+        readDecimalValue(data, "minFundingRate", minFundingRate);
+        ts = readStringAsInt64(data, "ts");;
+        readMagicEnum<SettState>(data, "settState", settState);
+        readDecimalValue(data, "settFundingRate", settFundingRate);
     }
 }
 
@@ -140,10 +146,10 @@ nlohmann::json FundingRates::toJson() const {
 void FundingRates::fromJson(const nlohmann::json &json) {
     Response::fromJson(json);
 
-    for (const auto &el: m_data.items()) {
+    for (const auto &el: data.items()) {
         FundingRate fundingRate;
         fundingRate.fromJson(el.value());
-        m_rates.push_back(fundingRate);
+        rates.push_back(fundingRate);
     }
 }
 
@@ -152,33 +158,33 @@ nlohmann::json Instrument::toJson() const {
 }
 
 void Instrument::fromJson(const nlohmann::json &json) {
-    readMagicEnum<InstrumentType>(json, "instType", m_instType);
-    readValue<std::string>(json, "instId", m_instId);
-    readValue<std::string>(json, "instFamily", m_instFamily);
-    readValue<std::string>(json, "uly", m_uly);
-    readValue<std::string>(json, "baseCcy", m_baseCcy);
-    readValue<std::string>(json, "quoteCcy", m_quoteCcy);
-    readValue<std::string>(json, "settleCcy", m_settleCcy);
-    readDecimalValue(json, "ctVal", m_ctVal);
-    readDecimalValue(json, "ctMult", m_ctMult);
-    readValue<std::string>(json, "ctValCcy", m_ctValCcy);
-    readMagicEnum<OptionType>(json, "optType", m_optType);
-    readDecimalValue(json, "stk", m_stk);
-    m_listTime = readStringAsInt64(json, "listTime");
-    m_expTime = readStringAsInt64(json, "expTime");
-    readDecimalValue(json, "lever", m_lever);
-    readDecimalValue(json, "tickSz", m_tickSz);
-    readDecimalValue(json, "lotSz", m_lotSz);
-    readDecimalValue(json, "minSz", m_minSz);
-    readMagicEnum<ContractType>(json, "ctType", m_ctType);
-    readMagicEnum<FuturesAlias>(json, "alias", m_alias);
-    readMagicEnum<InstrumentStatus>(json, "state", m_state);
-    readDecimalValue(json, "maxLmtSz", m_maxLmtSz);
-    readDecimalValue(json, "maxMktSz", m_maxMktSz);
-    readDecimalValue(json, "maxTwapSz", m_maxTwapSz);
-    readDecimalValue(json, "maxIcebergSz", m_maxIcebergSz);
-    readDecimalValue(json, "maxTriggerSz", m_maxTriggerSz);
-    readDecimalValue(json, "maxStopSz", m_maxStopSz);
+    readMagicEnum<InstrumentType>(json, "instType", instType);
+    readValue<std::string>(json, "instId", instId);
+    readValue<std::string>(json, "instFamily", instFamily);
+    readValue<std::string>(json, "uly", uly);
+    readValue<std::string>(json, "baseCcy", baseCcy);
+    readValue<std::string>(json, "quoteCcy", quoteCcy);
+    readValue<std::string>(json, "settleCcy", settleCcy);
+    readDecimalValue(json, "ctVal", ctVal);
+    readDecimalValue(json, "ctMult", ctMult);
+    readValue<std::string>(json, "ctValCcy", ctValCcy);
+    readMagicEnum<OptionType>(json, "optType", optType);
+    readDecimalValue(json, "stk", stk);
+    listTime = readStringAsInt64(json, "listTime");
+    expTime = readStringAsInt64(json, "expTime");
+    readDecimalValue(json, "lever", lever);
+    readDecimalValue(json, "tickSz", tickSz);
+    readDecimalValue(json, "lotSz", lotSz);
+    readDecimalValue(json, "minSz", minSz);
+    readMagicEnum<ContractType>(json, "ctType", ctType);
+    readMagicEnum<FuturesAlias>(json, "alias", alias);
+    readMagicEnum<InstrumentStatus>(json, "state", state);
+    readDecimalValue(json, "maxLmtSz", maxLmtSz);
+    readDecimalValue(json, "maxMktSz", maxMktSz);
+    readDecimalValue(json, "maxTwapSz", maxTwapSz);
+    readDecimalValue(json, "maxIcebergSz", maxIcebergSz);
+    readDecimalValue(json, "maxTriggerSz", maxTriggerSz);
+    readDecimalValue(json, "maxStopSz", maxStopSz);
 }
 
 nlohmann::json Instruments::toJson() const {
@@ -188,10 +194,10 @@ nlohmann::json Instruments::toJson() const {
 void Instruments::fromJson(const nlohmann::json &json) {
     Response::fromJson(json);
 
-    for (const auto &el: m_data.items()) {
+    for (const auto &el: data.items()) {
         Instrument instrument;
         instrument.fromJson(el.value());
-        m_instruments.push_back(instrument);
+        instruments.push_back(instrument);
     }
 }
 
@@ -200,30 +206,30 @@ nlohmann::json BalanceDetail::toJson() const {
 }
 
 void BalanceDetail::fromJson(const nlohmann::json &json) {
-    readDecimalValue(json, "availBal", m_availBal);
-    readDecimalValue(json, "availEq", m_availEq);
-    readDecimalValue(json, "cashBal", m_cashBal);
-    readValue<std::string>(json, "ccy", m_ccy);
-    readDecimalValue(json, "crossLiab", m_crossLiab);
-    readDecimalValue(json, "disEq", m_disEq);
-    readDecimalValue(json, "eq", m_eq);
-    readDecimalValue(json, "eqUsd", m_eqUsd);
-    readDecimalValue(json, "frozenBal", m_frozenBal);
-    readDecimalValue(json, "interest", m_interest);
-    readDecimalValue(json, "isoEq", m_isoEq);
-    readDecimalValue(json, "isoLiab", m_isoLiab);
-    readDecimalValue(json, "isoUpl", m_isoUpl);
-    readDecimalValue(json, "liab", m_liab);
-    readDecimalValue(json, "maxLoan", m_maxLoan);
-    readDecimalValue(json, "mgnRatio", m_mgnRatio);
-    readDecimalValue(json, "notionalLever", m_notionalLever);
-    readDecimalValue(json, "ordFrozen", m_ordFrozen);
-    readDecimalValue(json, "twap", m_twap);
-    readDecimalValue(json, "upl", m_upl);
-    m_uTime = readStringAsInt64(json, "uTime");
-    readDecimalValue(json, "uplLiab", m_uplLiab);
-    readDecimalValue(json, "stgyEq", m_stgyEq);
-    readDecimalValue(json, "spotInUseAmt", m_spotInUseAmt);
+    readDecimalValue(json, "availBal", availBal);
+    readDecimalValue(json, "availEq", availEq);
+    readDecimalValue(json, "cashBal", cashBal);
+    readValue<std::string>(json, "ccy", ccy);
+    readDecimalValue(json, "crossLiab", crossLiab);
+    readDecimalValue(json, "disEq", disEq);
+    readDecimalValue(json, "eq", eq);
+    readDecimalValue(json, "eqUsd", eqUsd);
+    readDecimalValue(json, "frozenBal", frozenBal);
+    readDecimalValue(json, "interest", interest);
+    readDecimalValue(json, "isoEq", isoEq);
+    readDecimalValue(json, "isoLiab", isoLiab);
+    readDecimalValue(json, "isoUpl", isoUpl);
+    readDecimalValue(json, "liab", liab);
+    readDecimalValue(json, "maxLoan", maxLoan);
+    readDecimalValue(json, "mgnRatio", mgnRatio);
+    readDecimalValue(json, "notionalLever", notionalLever);
+    readDecimalValue(json, "ordFrozen", ordFrozen);
+    readDecimalValue(json, "twap", twap);
+    readDecimalValue(json, "upl", upl);
+    uTime = readStringAsInt64(json, "uTime");
+    readDecimalValue(json, "uplLiab", uplLiab);
+    readDecimalValue(json, "stgyEq", stgyEq);
+    readDecimalValue(json, "spotInUseAmt", spotInUseAmt);
 }
 
 nlohmann::json Balance::toJson() const {
@@ -233,21 +239,21 @@ nlohmann::json Balance::toJson() const {
 void Balance::fromJson(const nlohmann::json &json) {
     Response::fromJson(json);
 
-    for (const auto &el: m_data.items()) {
-        readDecimalValue(el.value(), "adjEq", m_adjEq);
-        readDecimalValue(el.value(), "imr", m_imr);
-        readDecimalValue(el.value(), "isoEq", m_isoEq);
-        readDecimalValue(el.value(), "mgnRatio", m_mgnRatio);
-        readDecimalValue(el.value(), "mmr", m_mmr);
-        readDecimalValue(el.value(), "notionalUsd", m_notionalUsd);
-        readDecimalValue(el.value(), "ordFroz", m_ordFroz);
-        readDecimalValue(el.value(), "totalEq", m_totalEq);
-        m_uTime = readStringAsInt64(el.value(), "uTime");
+    for (const auto &el: data.items()) {
+        readDecimalValue(el.value(), "adjEq", adjEq);
+        readDecimalValue(el.value(), "imr", imr);
+        readDecimalValue(el.value(), "isoEq", isoEq);
+        readDecimalValue(el.value(), "mgnRatio", mgnRatio);
+        readDecimalValue(el.value(), "mmr", mmr);
+        readDecimalValue(el.value(), "notionalUsd", notionalUsd);
+        readDecimalValue(el.value(), "ordFroz", ordFroz);
+        readDecimalValue(el.value(), "totalEq", totalEq);
+        uTime = readStringAsInt64(el.value(), "uTime");
 
         for (const auto &elData: el.value()["details"].items()) {
             BalanceDetail balanceDetail;
             balanceDetail.fromJson(elData.value());
-            m_balanceDetails.push_back(balanceDetail);
+            balanceDetails.push_back(balanceDetail);
         }
     }
 }
@@ -259,8 +265,8 @@ nlohmann::json SystemTime::toJson() const {
 void SystemTime::fromJson(const nlohmann::json &json) {
     Response::fromJson(json);
 
-    for (const auto &el: m_data.items()) {
-        m_ts = readStringAsInt64(el.value(), "ts");
+    for (const auto &el: data.items()) {
+        ts = readStringAsInt64(el.value(), "ts");
     }
 }
 
@@ -269,42 +275,42 @@ nlohmann::json Position::toJson() const {
 }
 
 void Position::fromJson(const nlohmann::json &json) {
-    m_adl = readStringAsInt(json, "adl");
-    readDecimalValue(json, "availPos", m_availPos);
-    readDecimalValue(json, "avgPx", m_avgPx);
-    m_cTime = readStringAsInt64(json, "cTime");
-    readValue<std::string>(json, "ccy", m_ccy);
-    readDecimalValue(json, "imr", m_imr);
-    readValue<std::string>(json, "instId", m_instId);
-    readMagicEnum<InstrumentType>(json, "instType", m_instType);
-    readDecimalValue(json, "interest", m_interest);
-    readDecimalValue(json, "last", m_last);
-    readDecimalValue(json, "lever", m_lever);
-    readDecimalValue(json, "liab", m_liab);
-    readValue<std::string>(json, "liabCcy", m_liabCcy);
-    readDecimalValue(json, "liqPx", m_liqPx);
-    readDecimalValue(json, "margin", m_margin);
-    readDecimalValue(json, "markPx", m_markPx);
-    readMagicEnum<MarginMode>(json, "mgnMode", m_mgnMode);
-    readDecimalValue(json, "mgnRatio", m_mgnRatio);
-    readDecimalValue(json, "mmr", m_mmr);
-    readDecimalValue(json, "notionalUsd", m_notionalUsd);
-    readDecimalValue(json, "pos", m_pos);
-    readValue<std::string>(json, "posCcy", m_posCcy);
-    readValue<std::string>(json, "posId", m_posId);
+    adl = readStringAsInt(json, "adl");
+    readDecimalValue(json, "availPos", availPos);
+    readDecimalValue(json, "avgPx", avgPx);
+    cTime = readStringAsInt64(json, "cTime");
+    readValue<std::string>(json, "ccy", ccy);
+    readDecimalValue(json, "imr", imr);
+    readValue<std::string>(json, "instId", instId);
+    readMagicEnum<InstrumentType>(json, "instType", instType);
+    readDecimalValue(json, "interest", interest);
+    readDecimalValue(json, "last", last);
+    readDecimalValue(json, "lever", lever);
+    readDecimalValue(json, "liab", liab);
+    readValue<std::string>(json, "liabCcy", liabCcy);
+    readDecimalValue(json, "liqPx", liqPx);
+    readDecimalValue(json, "margin", margin);
+    readDecimalValue(json, "markPx", markPx);
+    readMagicEnum<MarginMode>(json, "mgnMode", mgnMode);
+    readDecimalValue(json, "mgnRatio", mgnRatio);
+    readDecimalValue(json, "mmr", mmr);
+    readDecimalValue(json, "notionalUsd", notionalUsd);
+    readDecimalValue(json, "pos", pos);
+    readValue<std::string>(json, "posCcy", posCcy);
+    readValue<std::string>(json, "posId", posId);
 
-    std::string posSide;
-    readValue<std::string>(json, "posSide", posSide);
+    std::string side;
+    readValue<std::string>(json, "posSide", side);
 
-    if (const auto posSideVal = OKX::stringToPositionSide(posSide)) {
-        m_posSide = *posSideVal;
+    if (const auto posSideVal = magic_enum::enum_cast<PositionSide>(side)) {
+        posSide = *posSideVal;
     }
 
-    readValue<std::string>(json, "tradeId", m_tradeId);
+    readValue<std::string>(json, "tradeId", tradeId);
 
-    m_uTime = readStringAsInt64(json, "uTime");
-    readDecimalValue(json, "upl", m_upl);
-    readDecimalValue(json, "uplRatio", m_uplRatio);
+    uTime = readStringAsInt64(json, "uTime");
+    readDecimalValue(json, "upl", upl);
+    readDecimalValue(json, "uplRatio", uplRatio);
 }
 
 nlohmann::json Positions::toJson() const {
@@ -314,24 +320,24 @@ nlohmann::json Positions::toJson() const {
 void Positions::fromJson(const nlohmann::json &json) {
     Response::fromJson(json);
 
-    for (const auto &el: m_data.items()) {
+    for (const auto &el: data.items()) {
         Position position;
         position.fromJson(el.value());
-        m_positions.push_back(position);
+        positions.push_back(position);
     }
 }
 
 nlohmann::json Order::toJson() const {
     nlohmann::json json;
-    json["instId"] = m_instId;
-    json["tdMode"] = m_tdMode;
-    json["clOrdId"] = m_clOrdId;
-    json["ccy"] = m_ccy;
-    json["side"] = m_side;
-    json["posSide"] = magic_enum::enum_name(m_posSide);
-    json["ordType"] = m_ordType;
-    json["sz"] = m_sz.str();
-    json["px"] = m_px.str(3);
+    json["instId"] = instId;
+    json["tdMode"] = tdMode;
+    json["clOrdId"] = clOrdId;
+    json["ccy"] = ccy;
+    json["side"] = side;
+    json["posSide"] = magic_enum::enum_name(posSide);
+    json["ordType"] = ordType;
+    json["sz"] = sz.str();
+    json["px"] = px.str(3);
 
     return json;
 }
@@ -347,11 +353,11 @@ nlohmann::json OrderResponse::toJson() const {
 void OrderResponse::fromJson(const nlohmann::json &json) {
     auto prd = json.dump();
 
-    readValue<std::string>(json, "clOrdId", m_clOrdId);
-    readValue<std::string>(json, "ordId", m_ordId);
-    readValue<std::string>(json, "tag", m_tag);
-    readValue<std::string>(json, "sCode", m_sCode);
-    readValue<std::string>(json, "sMsg", m_sMsg);
+    readValue<std::string>(json, "clOrdId", clOrdId);
+    readValue<std::string>(json, "ordId", ordId);
+    readValue<std::string>(json, "tag", tag);
+    readValue<std::string>(json, "sCode", sCode);
+    readValue<std::string>(json, "sMsg", sMsg);
 }
 
 nlohmann::json OrderResponses::toJson() const {
@@ -361,10 +367,10 @@ nlohmann::json OrderResponses::toJson() const {
 void OrderResponses::fromJson(const nlohmann::json &json) {
     Response::fromJson(json);
 
-    for (const auto &el: m_data.items()) {
+    for (const auto &el: data.items()) {
         OrderResponse orderResponse;
         orderResponse.fromJson(el.value());
-        m_orderResponses.push_back(orderResponse);
+        orderResponses.push_back(orderResponse);
     }
 }
 
@@ -373,35 +379,35 @@ nlohmann::json OrderDetail::toJson() const {
 }
 
 void OrderDetail::fromJson(const nlohmann::json &json) {
-    readMagicEnum<InstrumentType>(json, "instType", m_instType);
-    readValue<std::string>(json, "instId", m_instId);
-    readValue<std::string>(json, "ccy", m_ccy);
-    readValue<std::string>(json, "ordId", m_ordId);
-    readValue<std::string>(json, "clOrdId", m_clOrdId);
-    readDecimalValue(json, "px", m_px);
-    readDecimalValue(json, "sz", m_sz);
-    readDecimalValue(json, "pnl", m_pnl);
-    readMagicEnum<OrderType>(json, "ordType", m_ordType);
-    readMagicEnum<Side>(json, "side", m_side);
+    readMagicEnum<InstrumentType>(json, "instType", instType);
+    readValue<std::string>(json, "instId", instId);
+    readValue<std::string>(json, "ccy", ccy);
+    readValue<std::string>(json, "ordId", ordId);
+    readValue<std::string>(json, "clOrdId", clOrdId);
+    readDecimalValue(json, "px", px);
+    readDecimalValue(json, "sz", sz);
+    readDecimalValue(json, "pnl", pnl);
+    readMagicEnum<OrderType>(json, "ordType", ordType);
+    readMagicEnum<Side>(json, "side", side);
 
-    std::string posSide;
-    readValue<std::string>(json, "posSide", posSide);
+    std::string side;
+    readValue<std::string>(json, "posSide", side);
 
-    if (const auto posSideVal = OKX::stringToPositionSide(posSide)) {
-        m_posSide = *posSideVal;
+    if (const auto posSideVal = magic_enum::enum_cast<PositionSide>(side)) {
+        posSide = *posSideVal;
     }
 
-    readMagicEnum<MarginMode>(json, "tdMode", m_tdMode);
-    readDecimalValue(json, "accFillSz", m_accFillSz);
-    readDecimalValue(json, "fillPx", m_fillPx);
-    readValue<std::string>(json, "tradeId", m_tradeId);
-    readDecimalValue(json, "fillSz", m_fillSz);
-    m_fillTime = readStringAsInt64(json, "fillTime");
-    readMagicEnum<OrderState>(json, "state", m_state);
-    readDecimalValue(json, "avgPx", m_avgPx);
-    readDecimalValue(json, "lever", m_lever);
-    m_uTime = readStringAsInt64(json, "uTime");
-    m_cTime = readStringAsInt64(json, "cTime");
+    readMagicEnum<MarginMode>(json, "tdMode", tdMode);
+    readDecimalValue(json, "accFillSz", accFillSz);
+    readDecimalValue(json, "fillPx", fillPx);
+    readValue<std::string>(json, "tradeId", tradeId);
+    readDecimalValue(json, "fillSz", fillSz);
+    fillTime = readStringAsInt64(json, "fillTime");
+    readMagicEnum<OrderState>(json, "state", state);
+    readDecimalValue(json, "avgPx", avgPx);
+    readDecimalValue(json, "lever", lever);
+    uTime = readStringAsInt64(json, "uTime");
+    cTime = readStringAsInt64(json, "cTime");
 }
 
 nlohmann::json OrderDetails::toJson() const {
@@ -411,10 +417,10 @@ nlohmann::json OrderDetails::toJson() const {
 void OrderDetails::fromJson(const nlohmann::json &json) {
     Response::fromJson(json);
 
-    for (const auto &el: m_data.items()) {
+    for (const auto &el: data.items()) {
         OrderDetail orderDetail;
         orderDetail.fromJson(el.value());
-        m_orderDetails.push_back(orderDetail);
+        orderDetails.push_back(orderDetail);
     }
 }
 }

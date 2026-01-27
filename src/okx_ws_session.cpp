@@ -1,26 +1,26 @@
 /**
-OKX Futures WebSocket Session
+OKX WebSocket Session
 
 Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 */
 
-#include "vk/okx/okx_futures_ws_session.h"
+#include "vk/okx/okx_ws_session.h"
 #include "vk/utils/log_utils.h"
 #include "vk/utils/json_utils.h"
 #include <nlohmann/json.hpp>
 #include <boost/asio/buffers_iterator.hpp>
 #include <boost/asio/strand.hpp>
 
-namespace vk::okx::futures {
+namespace vk::okx {
 static constexpr int PING_INTERVAL_IN_S = 20;
 
 WebSocketSession::WebSocketSession(boost::asio::io_context &ioc, boost::asio::ssl::context &ctx,
                                    const onLogMessage &onLogMessageCB) : m_resolver(make_strand(ioc)),
-                                                                   m_ws(make_strand(ioc), ctx),
-                                                                   m_pingTimer(ioc, boost::asio::chrono::seconds(
-                                                                                   PING_INTERVAL_IN_S)) {
+                                                                         m_ws(make_strand(ioc), ctx),
+                                                                         m_pingTimer(ioc, boost::asio::chrono::seconds(
+                                                                             PING_INTERVAL_IN_S)) {
     m_logMessageCB = onLogMessageCB;
 }
 
@@ -54,7 +54,7 @@ std::string WebSocketSession::readSubscriptionRequest() {
     WSRequest wsRequest;
     WSSubscription wsSubscription;
     wsSubscription.fromJson(nlohmann::json::parse(m_subscriptionRequest));
-    wsRequest.m_subscriptions.push_back(wsSubscription);
+    wsRequest.subscriptions.push_back(wsSubscription);
     std::string retVal = wsRequest.toJson().dump();
 
     m_subscriptionRequest.clear();
@@ -75,13 +75,14 @@ void WebSocketSession::handleControlEvent(const nlohmann::json &json) {
     WSResponse wsResponse;
     wsResponse.fromJson(json);
 
-    if (wsResponse.m_event == EventType::error) {
+    if (wsResponse.event == EventType::error) {
         m_logMessageCB(LogSeverity::Error,
-                       fmt::format("OKX Error Event, code: {}, message: {}", wsResponse.m_code, wsResponse.m_msg));
-    } else if (wsResponse.m_event == EventType::subscribe) {
-        m_subscriptions.push_back(wsResponse.m_subscription.toJson().dump());
-    } else if (wsResponse.m_event == EventType::unsubscribe) {
-        if (const auto it = std::ranges::find(m_subscriptions, wsResponse.m_subscription.toJson().dump()); it != m_subscriptions.end()) {
+                       fmt::format("OKX Error Event, code: {}, message: {}", wsResponse.code, wsResponse.msg));
+    } else if (wsResponse.event == EventType::subscribe) {
+        m_subscriptions.push_back(wsResponse.subscription.toJson().dump());
+    } else if (wsResponse.event == EventType::unsubscribe) {
+        if (const auto it = std::ranges::find(m_subscriptions, wsResponse.subscription.toJson().dump());
+            it != m_subscriptions.end()) {
             m_subscriptions.erase(it);
         }
     }
@@ -121,7 +122,8 @@ void WebSocketSession::run(const std::string &host, const std::string &port, con
 }
 
 void
-WebSocketSession::onResolve(const boost::beast::error_code &ec, const boost::asio::ip::tcp::resolver::results_type &results) {
+WebSocketSession::onResolve(const boost::beast::error_code &ec,
+                            const boost::asio::ip::tcp::resolver::results_type &results) {
     if (ec) {
         return m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, ec.message()));
     }
@@ -131,8 +133,8 @@ WebSocketSession::onResolve(const boost::beast::error_code &ec, const boost::asi
 
     /// Make the connection on the IP address we get from a lookup
     get_lowest_layer(m_ws).async_connect(results,
-                                                       boost::beast::bind_front_handler(&WebSocketSession::onConnect,
-                                                           shared_from_this()));
+                                         boost::beast::bind_front_handler(&WebSocketSession::onConnect,
+                                                                          shared_from_this()));
 }
 
 void WebSocketSession::onConnect(boost::beast::error_code ec,
@@ -273,7 +275,8 @@ void WebSocketSession::onRead(const boost::beast::error_code &ec, std::size_t by
 }
 
 void WebSocketSession::ping() {
-    if (const std::chrono::duration<double> elapsed = m_lastPingTime - m_lastPongTime; elapsed.count() > PING_INTERVAL_IN_S) {
+    if (const std::chrono::duration<double> elapsed = m_lastPingTime - m_lastPongTime;
+        elapsed.count() > PING_INTERVAL_IN_S) {
         m_logMessageCB(LogSeverity::Warning, fmt::format("{}: {}", MAKE_FILELINE, "ping expired"));
     }
 

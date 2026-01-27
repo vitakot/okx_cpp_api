@@ -7,8 +7,8 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@gmail.com>.
 */
 
 
-#ifndef INCLUDE_VK_MEXC_EXCHANGE_CONNECTOR_H
-#define INCLUDE_VK_MEXC_EXCHANGE_CONNECTOR_H
+#ifndef INCLUDE_VK_OKX_EXCHANGE_CONNECTOR_H
+#define INCLUDE_VK_OKX_EXCHANGE_CONNECTOR_H
 
 #include "vk/interface/i_exchange_connector.h"
 #include "vk/common/module_factory.h"
@@ -43,7 +43,7 @@ public:
 
     [[nodiscard]] std::vector<FundingRate> getFundingRates() const override;
 
-    [[nodiscard]] std::vector<Ticker> getTickerInfo(const std::string& symbol) const override;
+    [[nodiscard]] std::vector<Ticker> getTickerInfo(const std::string &symbol) const override;
 
     [[nodiscard]] std::int64_t getServerTime() const override;
 
@@ -52,6 +52,7 @@ public:
     }
 };
 
+// Not inline! - ignore the warning
 BOOST_SYMBOL_EXPORT IModuleFactory *getModuleFactory() {
     if (!g_moduleFactory) {
         FactoryInfo factoryInfo;
@@ -69,4 +70,4 @@ BOOST_SYMBOL_EXPORT IModuleFactory *getModuleFactory() {
     return g_moduleFactory;
 }
 }
-#endif //INCLUDE_VK_MEXC_EXCHANGE_CONNECTOR_H
+#endif //INCLUDE_VK_OKX_EXCHANGE_CONNECTOR_H

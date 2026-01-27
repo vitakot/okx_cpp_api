@@ -1,12 +1,12 @@
 /**
-OKX Futures REST Client
+OKX REST Client
 
 Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 */
 
-#include "vk/okx/okx_futures_rest_client.h"
+#include "vk/okx/okx_rest_client.h"
 #include "vk/okx/okx_http_session.h"
 #include "vk/okx/okx.h"
 #include "vk/utils/utils.h"
@@ -14,15 +14,15 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <mutex>
 #include <thread>
 
-namespace vk::okx::futures {
+namespace vk::okx {
 template<typename ValueType>
 ValueType handleOKXResponse(const http::response<http::string_body> &response) {
     ValueType retVal;
     retVal.fromJson(nlohmann::json::parse(response.body()));
 
-    if (std::stoi(retVal.m_code) != 0) {
+    if (std::stoi(retVal.code) != 0) {
         throw std::runtime_error(
-            fmt::format("OKX API error, code: {}, msg: {}", retVal.m_code, retVal.m_msg).c_str());
+            fmt::format("OKX API error, code: {}, msg: {}", retVal.code, retVal.msg).c_str());
     }
 
     return retVal;
@@ -34,11 +34,11 @@ private:
     mutable std::recursive_mutex m_locker;
 
 public:
-    RESTClient *m_parent = nullptr;
-    std::shared_ptr<HTTPSession> m_httpSession;
+    RESTClient *parent = nullptr;
+    std::shared_ptr<HTTPSession> httpSession;
 
     explicit P(RESTClient *parent) {
-        m_parent = parent;
+        this->parent = parent;
     }
 
     [[nodiscard]] Instruments getInstruments() const {
@@ -53,7 +53,7 @@ public:
 
     void setInstruments(const std::vector<Instrument> &instruments) {
         std::lock_guard lk(m_locker);
-        m_instruments.m_instruments = instruments;
+        m_instruments.instruments = instruments;
     }
 
     static http::response<http::string_body> checkResponse(const http::response<http::string_body> &response) {
@@ -74,7 +74,7 @@ public:
 
 RESTClient::RESTClient(const std::string &apiKey, const std::string &apiSecret, const std::string &passphrase) : m_p(
     std::make_unique<P>(this)) {
-    m_p->m_httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret, passphrase);
+    m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret, passphrase);
 }
 
 RESTClient::~RESTClient() = default;
@@ -82,8 +82,8 @@ RESTClient::~RESTClient() = default;
 void
 RESTClient::setCredentials(const std::string &apiKey, const std::string &apiSecret,
                            const std::string &passphrase) const {
-    m_p->m_httpSession.reset();
-    m_p->m_httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret, passphrase);
+    m_p->httpSession.reset();
+    m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret, passphrase);
 }
 
 std::vector<Ticker> RESTClient::getTickers(const InstrumentType instrumentType) const {
@@ -92,22 +92,22 @@ std::vector<Ticker> RESTClient::getTickers(const InstrumentType instrumentType) 
 
     parameters.insert_or_assign("instType", magic_enum::enum_name(instrumentType));
 
-    const auto response = P::checkResponse(m_p->m_httpSession->get(path, parameters));
-    return handleOKXResponse<Tickers>(response).m_tickers;
+    const auto response = P::checkResponse(m_p->httpSession->get(path, parameters));
+    return handleOKXResponse<Tickers>(response).tickers;
 }
 
 std::vector<Instrument> RESTClient::getInstruments(const InstrumentType instrumentType, const bool force) const {
-    if (m_p->getInstruments().m_instruments.empty() || force) {
+    if (m_p->getInstruments().instruments.empty() || force) {
         const std::string path = "/api/v5/public/instruments";
         std::map<std::string, std::string> parameters;
 
         parameters.insert_or_assign("instType", magic_enum::enum_name(instrumentType));
 
-        const auto response = P::checkResponse(m_p->m_httpSession->get(path, parameters));
+        const auto response = P::checkResponse(m_p->httpSession->get(path, parameters));
         m_p->setInstruments(handleOKXResponse<Instruments>(response));
     }
 
-    return m_p->getInstruments().m_instruments;
+    return m_p->getInstruments().instruments;
 }
 
 void RESTClient::setInstruments(const std::vector<Instrument> &instruments) const {
@@ -136,8 +136,8 @@ RESTClient::P::getHistoricalPrices(const std::string &instId, const BarSize barS
         parameters.insert_or_assign("limit", std::to_string(limit));
     }
 
-    const auto response = checkResponse(m_httpSession->get(path, parameters));
-    return handleOKXResponse<Candles>(response).m_candles;
+    const auto response = checkResponse(httpSession->get(path, parameters));
+    return handleOKXResponse<Candles>(response).candles;
 }
 
 std::vector<Candle>
@@ -153,7 +153,7 @@ RESTClient::getHistoricalPrices(const std::string &instId, const BarSize barSize
 
     while (!candles.empty()) {
         retVal.insert(retVal.end(), candles.begin(), candles.end());
-        const std::int64_t lastToTime = candles.back().m_ts;
+        const std::int64_t lastToTime = candles.back().ts;
         candles.clear();
 
         if (from < lastToTime) {
@@ -163,7 +163,7 @@ RESTClient::getHistoricalPrices(const std::string &instId, const BarSize barSize
 
     /// Remove last candle if it is not valid
     if (!retVal.empty()) {
-        if (!retVal.back().m_confirm) {
+        if (!retVal.back().confirm) {
             retVal.pop_back();
         }
     }
@@ -173,16 +173,12 @@ RESTClient::getHistoricalPrices(const std::string &instId, const BarSize barSize
 }
 
 FundingRate RESTClient::getLastFundingRate(const std::string &instId) const {
-    using namespace std::chrono_literals;
-    std::this_thread::sleep_for(35ms);
-    // const std::string path = "/api/v5/public/funding-rate";
-    // std::map<std::string, std::string> parameters;
-    //
-    // parameters.insert_or_assign("instId", instId);
-    //
-    // const auto response = P::checkResponse(m_p->m_httpSession->get(path, parameters));
-    // return handleOKXResponse<FundingRate>(response);
-    return {};
+    const std::string path = "/api/v5/public/funding-rate";
+    std::map<std::string, std::string> parameters;
+    parameters.insert_or_assign("instId", instId);
+
+    const auto response = P::checkResponse(m_p->httpSession->get(path, parameters));
+    return handleOKXResponse<FundingRate>(response);
 }
 
 std::vector<FundingRate>
@@ -204,8 +200,8 @@ RESTClient::P::getFundingRates(const std::string &instId, const int64_t from, co
         parameters.insert_or_assign("limit", std::to_string(limit));
     }
 
-    const auto response = checkResponse(m_httpSession->get(path, parameters));
-    return handleOKXResponse<FundingRates>(response).m_rates;
+    const auto response = checkResponse(httpSession->get(path, parameters));
+    return handleOKXResponse<FundingRates>(response).rates;
 }
 
 std::vector<FundingRate>
@@ -219,7 +215,7 @@ RESTClient::getFundingRates(const std::string &instId, const int64_t from, const
 
     while (!rates.empty()) {
         retVal.insert(retVal.end(), rates.begin(), rates.end());
-        const std::int64_t lastToTime = rates.back().m_fundingTime;
+        const std::int64_t lastToTime = rates.back().fundingTime;
         rates.clear();
 
         if (from < lastToTime) {
@@ -239,7 +235,7 @@ Balance RESTClient::getBalance(const std::string &ccy) const {
         parameters.insert_or_assign("ccy", ccy);
     }
 
-    const auto response = P::checkResponse(m_p->m_httpSession->get(path, parameters, false));
+    const auto response = P::checkResponse(m_p->httpSession->get(path, parameters, false));
     return handleOKXResponse<Balance>(response);
 }
 
@@ -247,8 +243,8 @@ std::int64_t RESTClient::getSystemTime() const {
     const std::string path = "/api/v5/public/time";
     const std::map<std::string, std::string> parameters;
 
-    const auto response = P::checkResponse(m_p->m_httpSession->get(path, parameters));
-    return handleOKXResponse<SystemTime>(response).m_ts;
+    const auto response = P::checkResponse(m_p->httpSession->get(path, parameters));
+    return handleOKXResponse<SystemTime>(response).ts;
 }
 
 std::vector<Position> RESTClient::getPositions(const InstrumentType instrumentType, const std::string &instId) const {
@@ -261,8 +257,8 @@ std::vector<Position> RESTClient::getPositions(const InstrumentType instrumentTy
         parameters.insert_or_assign("instId", instId);
     }
 
-    const auto response = P::checkResponse(m_p->m_httpSession->get(path, parameters, false));
-    return handleOKXResponse<Positions>(response).m_positions;
+    const auto response = P::checkResponse(m_p->httpSession->get(path, parameters, false));
+    return handleOKXResponse<Positions>(response).positions;
 }
 
 std::vector<OrderResponse>
@@ -274,14 +270,14 @@ RESTClient::cancelOrder(const std::string &instId, const std::string &clientOrde
     json["clOrdId"] = clientOrderId;
     json["ordId"] = orderId;
 
-    const auto response = P::checkResponse(m_p->m_httpSession->post(path, json, false));
-    return handleOKXResponse<OrderResponses>(response).m_orderResponses;
+    const auto response = P::checkResponse(m_p->httpSession->post(path, json, false));
+    return handleOKXResponse<OrderResponses>(response).orderResponses;
 }
 
 std::vector<OrderResponse> RESTClient::placeOrder(const Order &order) const {
     const std::string path = "/api/v5/trade/order";
-    const auto response = P::checkResponse(m_p->m_httpSession->post(path, order.toJson(), false));
-    return handleOKXResponse<OrderResponses>(response).m_orderResponses;
+    const auto response = P::checkResponse(m_p->httpSession->post(path, order.toJson(), false));
+    return handleOKXResponse<OrderResponses>(response).orderResponses;
 }
 
 std::vector<OrderDetail> RESTClient::getOrderDetail(const std::string &instId, const std::string &clientOrderId,
@@ -293,7 +289,7 @@ std::vector<OrderDetail> RESTClient::getOrderDetail(const std::string &instId, c
     parameters.insert_or_assign("clOrdId", clientOrderId);
     parameters.insert_or_assign("ordId", orderId);
 
-    const auto response = P::checkResponse(m_p->m_httpSession->get(path, parameters, false));
-    return handleOKXResponse<OrderDetails>(response).m_orderDetails;
+    const auto response = P::checkResponse(m_p->httpSession->get(path, parameters, false));
+    return handleOKXResponse<OrderDetails>(response).orderDetails;
 }
 }
