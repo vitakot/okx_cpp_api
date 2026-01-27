@@ -103,148 +103,81 @@ bool OKX::isValidBarSize(const std::int32_t size, BarSize &barSize) {
     }
 }
 
-std::optional<BarSize> OKX::stringToBarSize(const std::string &barSize) {
-    if (barSize == "1m") {
-        return BarSize::_1m;
-    }
-    if (barSize == "3m") {
-        return BarSize::_3m;
-    }
-    if (barSize == "5m") {
-        return BarSize::_5m;
-    }
-    if (barSize == "15m") {
-        return BarSize::_15m;
-    }
-    if (barSize == "30m") {
-        return BarSize::_30m;
-    }
-    if (barSize == "1H") {
-        return BarSize::_1H;
-    }
-    if (barSize == "2H") {
-        return BarSize::_2H;
-    }
-    if (barSize == "4H") {
-        return BarSize::_4H;
-    }
-    if (barSize == "6H") {
-        return BarSize::_6H;
-    }
-    if (barSize == "12H") {
-        return BarSize::_12H;
-    }
-    if (barSize == "1D") {
-        return BarSize::_1D;
-    }
-    if (barSize == "2D") {
-        return BarSize::_2D;
-    }
-    if (barSize == "3D") {
-        return BarSize::_3D;
-    }
-    if (barSize == "1W") {
-        return BarSize::_1W;
-    }
-    if (barSize == "1M") {
-        return BarSize::_1M;
-    }
-    if (barSize == "3M") {
-        return BarSize::_3M;
-    }
-
-    return {};
-}
-
-futures::CandlestickChannel OKX::barSizeToCandlestickChannel(const BarSize size) {
+CandlestickChannel OKX::barSizeToCandlestickChannel(const BarSize size) {
     switch (size) {
         case BarSize::_1m:
-            return futures::CandlestickChannel::candle1m;
+            return CandlestickChannel::candle1m;
         case BarSize::_3m:
-            return futures::CandlestickChannel::candle3m;
+            return CandlestickChannel::candle3m;
         case BarSize::_5m:
-            return futures::CandlestickChannel::candle5m;
+            return CandlestickChannel::candle5m;
         case BarSize::_15m:
-            return futures::CandlestickChannel::candle15m;
+            return CandlestickChannel::candle15m;
         case BarSize::_30m:
-            return futures::CandlestickChannel::candle30m;
+            return CandlestickChannel::candle30m;
         case BarSize::_1H:
-            return futures::CandlestickChannel::candle1H;
+            return CandlestickChannel::candle1H;
         case BarSize::_2H:
-            return futures::CandlestickChannel::candle2H;
+            return CandlestickChannel::candle2H;
         case BarSize::_4H:
-            return futures::CandlestickChannel::candle4H;
+            return CandlestickChannel::candle4H;
         case BarSize::_6H:
-            return futures::CandlestickChannel::candle6H;
+            return CandlestickChannel::candle6H;
         case BarSize::_12H:
-            return futures::CandlestickChannel::candle12H;
+            return CandlestickChannel::candle12H;
         case BarSize::_1D:
-            return futures::CandlestickChannel::candle1D;
+            return CandlestickChannel::candle1D;
         case BarSize::_2D:
-            return futures::CandlestickChannel::candle2D;
+            return CandlestickChannel::candle2D;
         case BarSize::_3D:
-            return futures::CandlestickChannel::candle3D;
+            return CandlestickChannel::candle3D;
         case BarSize::_1W:
-            return futures::CandlestickChannel::candle1W;
+            return CandlestickChannel::candle1W;
         case BarSize::_1M:
-            return futures::CandlestickChannel::candle1M;
+            return CandlestickChannel::candle1M;
         case BarSize::_3M:
-            return futures::CandlestickChannel::candle3M;
+            return CandlestickChannel::candle3M;
         default:
-            return futures::CandlestickChannel::candle1H;
+            return CandlestickChannel::candle1H;
     }
 }
 
-BarSize OKX::candlestickChannelToBarSize(const futures::CandlestickChannel candlestickChannel) {
+BarSize OKX::candlestickChannelToBarSize(const CandlestickChannel candlestickChannel) {
     switch (candlestickChannel) {
-        case futures::CandlestickChannel::candle1m:
+        case CandlestickChannel::candle1m:
             return BarSize::_1m;
-        case futures::CandlestickChannel::candle3m:
+        case CandlestickChannel::candle3m:
             return BarSize::_3m;
-        case futures::CandlestickChannel::candle5m:
+        case CandlestickChannel::candle5m:
             return BarSize::_5m;
-        case futures::CandlestickChannel::candle15m:
+        case CandlestickChannel::candle15m:
             return BarSize::_15m;
-        case futures::CandlestickChannel::candle30m:
+        case CandlestickChannel::candle30m:
             return BarSize::_30m;
-        case futures::CandlestickChannel::candle1H:
+        case CandlestickChannel::candle1H:
             return BarSize::_1H;
-        case futures::CandlestickChannel::candle2H:
+        case CandlestickChannel::candle2H:
             return BarSize::_2H;
-        case futures::CandlestickChannel::candle4H:
+        case CandlestickChannel::candle4H:
             return BarSize::_4H;
-        case futures::CandlestickChannel::candle6H:
+        case CandlestickChannel::candle6H:
             return BarSize::_6H;
-        case futures::CandlestickChannel::candle12H:
+        case CandlestickChannel::candle12H:
             return BarSize::_12H;
-        case futures::CandlestickChannel::candle1D:
+        case CandlestickChannel::candle1D:
             return BarSize::_1D;
-        case futures::CandlestickChannel::candle2D:
+        case CandlestickChannel::candle2D:
             return BarSize::_2D;
-        case futures::CandlestickChannel::candle3D:
+        case CandlestickChannel::candle3D:
             return BarSize::_3D;
-        case futures::CandlestickChannel::candle1W:
+        case CandlestickChannel::candle1W:
             return BarSize::_1W;
-        case futures::CandlestickChannel::candle1M:
+        case CandlestickChannel::candle1M:
             return BarSize::_1M;
-        case futures::CandlestickChannel::candle3M:
+        case CandlestickChannel::candle3M:
             return BarSize::_3M;
         default:
             return BarSize::_1H;
     }
-}
-
-std::optional<PositionSide> OKX::stringToPositionSide(const std::string &positionSide) {
-    if (positionSide == "long") {
-        return PositionSide::_long;
-    }
-    if (positionSide == "short") {
-        return PositionSide::_short;
-    }
-    if (positionSide == "net") {
-        return PositionSide::_net;
-    }
-
-    return {};
 }
 }

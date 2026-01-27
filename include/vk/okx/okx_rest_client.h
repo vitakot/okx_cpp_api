@@ -1,19 +1,19 @@
 /**
-OKX Futures REST Client
+OKX REST Client
 
 Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 */
 
-#ifndef OKX_FUTURES_REST_CLIENT_H
-#define OKX_FUTURES_REST_CLIENT_H
+#ifndef OKX_REST_CLIENT_H
+#define OKX_REST_CLIENT_H
 
 #include "okx_models.h"
 #include <string>
 #include <memory>
 
-namespace vk::okx::futures {
+namespace vk::okx {
 class RESTClient {
     struct P;
     std::unique_ptr<P> m_p{};
@@ -80,8 +80,8 @@ public:
     /**
      * Retrieve funding rate history. This endpoint can retrieve data from the last 3 months.
      * @param instId instrument Id, e.g. "ETH-USDT-SWAP"
-     * @param from timestamp in ms, must be smaller then "to"
-     * @param to timestamp in ms, must be bigger then "from"
+     * @param from timestamp in ms, must be smaller than "to"
+     * @param to timestamp in ms, must be bigger than "from"
      * @param limit maximum number of returned records, maximum and also the default value is 100
      * @return vector of FundingRate structures
      */
@@ -143,4 +143,4 @@ public:
 };
 }
 
-#endif //OKX_FUTURES_REST_CLIENT_H
+#endif //OKX_REST_CLIENT_H

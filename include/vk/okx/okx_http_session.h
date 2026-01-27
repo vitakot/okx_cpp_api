@@ -30,10 +30,12 @@ public:
 
     ~HTTPSession();
 
-    http::response<http::string_body> get(const std::string &path, const std::map<std::string, std::string> &parameters,
-                                          bool isPublic = true) const;
+    [[nodiscard]] http::response<http::string_body> get(const std::string &path,
+                                                        const std::map<std::string, std::string> &parameters,
+                                                        bool isPublic = true) const;
 
-    http::response<http::string_body> post(const std::string &path, const nlohmann::json &json, bool isPublic = true) const;
+    [[nodiscard]] http::response<http::string_body> post(const std::string &path, const nlohmann::json &json,
+                                                         bool isPublic = true) const;
 };
 }
 #endif //INCLUDE_VK_OKX_HTTP_SESSION_H

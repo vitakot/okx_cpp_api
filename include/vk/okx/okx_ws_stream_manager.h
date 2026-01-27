@@ -1,20 +1,20 @@
 /**
-OKX Futures WebSocket Stream manager
+OKX WebSocket Stream manager
 
 Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 */
 
-#ifndef INCLUDE_VK_OKX_FUTURES_WS_STREAM_MANAGER_H
-#define INCLUDE_VK_OKX_FUTURES_WS_STREAM_MANAGER_H
+#ifndef INCLUDE_VK_OKX_WS_STREAM_MANAGER_H
+#define INCLUDE_VK_OKX_WS_STREAM_MANAGER_H
 
 #include "vk/utils/log_utils.h"
 #include "okx_event_models.h"
 #include "okx_models.h"
 #include <optional>
 
-namespace vk::okx::futures {
+namespace vk::okx {
 class WSStreamManager {
     struct P;
     std::unique_ptr<P> m_p{};
@@ -75,4 +75,4 @@ public:
 };
 }
 
-#endif //INCLUDE_VK_OKX_FUTURES_WS_STREAM_MANAGER_H
+#endif //INCLUDE_VK_OKX_WS_STREAM_MANAGER_H

@@ -1,5 +1,5 @@
 /**
-OKX Futures WebSocket Session
+OKX WebSocket Session
 
 Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 SPDX-License-Identifier: MIT
@@ -18,7 +18,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "okx_event_models.h"
 #include <nlohmann/json_fwd.hpp>
 
-namespace vk::okx::futures {
+namespace vk::okx {
 using onDataEvent = std::function<void(const DataEvent &event)>;
 
 class WebSocketSession final : public std::enable_shared_from_this<WebSocketSession> {

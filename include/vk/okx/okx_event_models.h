@@ -13,40 +13,10 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/okx/okx_models.h"
 #include <nlohmann/json.hpp>
 
-namespace vk::okx::futures {
-enum class OperationType : std::int32_t {
-    subscribe,
-    unsubscribe
-};
-
-enum class EventType : std::int32_t {
-    subscribe,
-    unsubscribe,
-    error
-};
-
-enum class CandlestickChannel : std::int32_t {
-    candle1m,
-    candle3m,
-    candle5m,
-    candle15m,
-    candle30m,
-    candle1H,
-    candle2H,
-    candle4H,
-    candle6H,
-    candle12H,
-    candle1D,
-    candle2D,
-    candle3D,
-    candle1W,
-    candle1M,
-    candle3M
-};
-
+namespace vk::okx {
 struct WSSubscription final : IJson {
-    std::string m_channel{};
-    std::string m_instId{};
+    std::string channel{};
+    std::string instId{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
@@ -54,8 +24,8 @@ struct WSSubscription final : IJson {
 };
 
 struct WSRequest final : IJson {
-    OperationType m_op{OperationType::subscribe};
-    std::vector<WSSubscription> m_subscriptions{};
+    OperationType op{OperationType::subscribe};
+    std::vector<WSSubscription> subscriptions{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
@@ -63,10 +33,10 @@ struct WSRequest final : IJson {
 };
 
 struct WSResponse final : IJson {
-    EventType m_event{EventType::subscribe};
-    WSSubscription m_subscription{};
-    std::string m_code{};
-    std::string m_msg{};
+    EventType event{EventType::subscribe};
+    WSSubscription subscription{};
+    std::string code{};
+    std::string msg{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
@@ -74,9 +44,9 @@ struct WSResponse final : IJson {
 };
 
 struct DataEvent final : IJson {
-    std::string m_channel{};
-    std::string m_instId{};
-    nlohmann::json m_data{};
+    std::string channel{};
+    std::string instId{};
+    nlohmann::json data{};
 
     ~DataEvent() override = default;
 
@@ -86,7 +56,7 @@ struct DataEvent final : IJson {
 };
 
 struct DataEventCandlestick final : IJson {
-    std::vector<Candle> m_candles{};
+    std::vector<Candle> candles{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
@@ -94,7 +64,7 @@ struct DataEventCandlestick final : IJson {
 };
 
 struct DataEventTicker final : IJson {
-    std::vector<Ticker> m_tickers{};
+    std::vector<Ticker> tickers{};
 
     [[nodiscard]] nlohmann::json toJson() const override;
 
