@@ -14,6 +14,9 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <memory>
 
 namespace vk::okx {
+
+using onCandlesDownloaded = std::function<void(const std::vector<Candle>&)>;
+
 class RESTClient {
     struct P;
     std::unique_ptr<P> m_p{};
@@ -61,13 +64,14 @@ public:
      * @param from timestamp in ms, must be smaller than "to"
      * @param to timestamp in ms, must be bigger than "from"
      * @param limit maximum number of returned candles, maximum and also the default value is 100
+     * @param writer
      * @return vector of Candle structures
      * @throws nlohmann::json::exception, std::exception
      * @see https://www.okx.com/docs-v5/en/#rest-api-market-data-get-candlesticks-history
      */
     [[nodiscard]] std::vector<Candle>
     getHistoricalPrices(const std::string &instId, BarSize barSize, std::int64_t from, std::int64_t to,
-                        std::int32_t limit = -1) const;
+                        std::int32_t limit = -1, const onCandlesDownloaded &writer = {}) const;
 
     /**
      * Retrieve funding rate.

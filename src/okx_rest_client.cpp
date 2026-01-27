@@ -143,7 +143,8 @@ RESTClient::P::getHistoricalPrices(const std::string &instId, const BarSize barS
 std::vector<Candle>
 RESTClient::getHistoricalPrices(const std::string &instId, const BarSize barSize, const std::int64_t from,
                                 const std::int64_t to,
-                                const std::int32_t limit) const {
+                                const std::int32_t limit,
+                                const onCandlesDownloaded &writer) const {
     std::vector<Candle> retVal;
     std::vector<Candle> candles;
 
@@ -154,6 +155,15 @@ RESTClient::getHistoricalPrices(const std::string &instId, const BarSize barSize
     while (!candles.empty()) {
         retVal.insert(retVal.end(), candles.begin(), candles.end());
         const std::int64_t lastToTime = candles.back().ts;
+
+        if (writer) {
+            if (!candles.back().confirm) {
+                candles.pop_back();
+            }
+
+            writer(candles);
+        }
+
         candles.clear();
 
         if (from < lastToTime) {
