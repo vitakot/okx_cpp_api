@@ -54,7 +54,7 @@ else ()
     add_library(okx_api STATIC ${SOURCES} ${HEADERS})
 
     add_executable(okx_test test/main.cpp)
-    target_link_libraries(okx_test PRIVATE spdlog::spdlog okx_api)
+    target_link_libraries(okx_test PRIVATE spdlog::spdlog_header_only okx_api)
 endif ()
 
-target_link_libraries(okx_api PRIVATE spdlog::spdlog OpenSSL::Crypto OpenSSL::SSL vk_common nlohmann_json::nlohmann_json)
+target_link_libraries(okx_api PRIVATE spdlog::spdlog_header_only OpenSSL::Crypto OpenSSL::SSL vk_common nlohmann_json::nlohmann_json)
