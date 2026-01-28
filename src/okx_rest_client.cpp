@@ -13,6 +13,8 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/utils/magic_enum_wrapper.hpp"
 #include <mutex>
 #include <thread>
+#include <deque>
+#include <spdlog/spdlog.h>
 
 namespace vk::okx {
 template<typename ValueType>
@@ -28,10 +30,50 @@ ValueType handleOKXResponse(const http::response<http::string_body> &response) {
     return retVal;
 }
 
+struct RateLimiter {
+    std::mutex m_mutex;
+    std::deque<std::int64_t> m_requestTimes;
+    const size_t m_limit;
+    const std::int64_t m_windowSizeMs;
+
+    RateLimiter(const size_t limit, const std::int64_t windowMs)
+        : m_limit(limit), m_windowSizeMs(windowMs) {
+    }
+
+    void wait() {
+        std::unique_lock lock(m_mutex);
+        auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+
+        // Remove old requests
+        while (!m_requestTimes.empty() && (now - m_requestTimes.front() > m_windowSizeMs)) {
+            m_requestTimes.pop_front();
+        }
+
+        if (m_requestTimes.size() >= m_limit) {
+            const auto oldest = m_requestTimes.front();
+
+            if (auto waitTime = (oldest + m_windowSizeMs) - now + 10; waitTime > 0) {
+                spdlog::info("Rate limit reached (Local). Waiting for {} ms", waitTime);
+                std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+
+                // Update now after sleep
+                now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::system_clock::now().time_since_epoch()).count();
+                while (!m_requestTimes.empty() && (now - m_requestTimes.front() > m_windowSizeMs)) {
+                    m_requestTimes.pop_front();
+                }
+            }
+        }
+        m_requestTimes.push_back(now);
+    }
+};
+
 struct RESTClient::P {
 private:
     Instruments m_instruments;
     mutable std::recursive_mutex m_locker;
+    mutable RateLimiter m_klineLimiter{20, 2000};
 
 public:
     RESTClient *parent = nullptr;
@@ -136,6 +178,7 @@ RESTClient::P::getHistoricalPrices(const std::string &instId, const BarSize barS
         parameters.insert_or_assign("limit", std::to_string(limit));
     }
 
+    m_klineLimiter.wait();
     const auto response = checkResponse(httpSession->get(path, parameters));
     return handleOKXResponse<Candles>(response).candles;
 }
