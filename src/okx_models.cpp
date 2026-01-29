@@ -423,4 +423,91 @@ void OrderDetails::fromJson(const nlohmann::json &json) {
         orderDetails.push_back(orderDetail);
     }
 }
+
+nlohmann::json MarketDataFileInfo::toJson() const {
+    nlohmann::json json;
+    json["filename"] = filename;
+    json["dateTs"] = std::to_string(dateTs);
+    json["sizeMB"] = sizeMB;
+    json["url"] = url;
+    return json;
+}
+
+void MarketDataFileInfo::fromJson(const nlohmann::json &json) {
+    readValue<std::string>(json, "filename", filename);
+    dateTs = readStringAsInt64(json, "dateTs");
+    readValue<std::string>(json, "sizeMB", sizeMB);
+    readValue<std::string>(json, "url", url);
+}
+
+nlohmann::json MarketDataGroupDetail::toJson() const {
+    nlohmann::json json;
+    json["instId"] = instId;
+    json["instFamily"] = instFamily;
+    json["instType"] = magic_enum::enum_name(instType);
+    json["dateRangeStart"] = std::to_string(dateRangeStart);
+    json["dateRangeEnd"] = std::to_string(dateRangeEnd);
+    json["groupSizeMB"] = groupSizeMB;
+
+    nlohmann::json groupDetailsJson = nlohmann::json::array();
+    for (const auto &fileInfo: groupDetails) {
+        groupDetailsJson.push_back(fileInfo.toJson());
+    }
+    json["groupDetails"] = groupDetailsJson;
+
+    return json;
+}
+
+void MarketDataGroupDetail::fromJson(const nlohmann::json &json) {
+    readValue<std::string>(json, "instId", instId);
+    readValue<std::string>(json, "instFamily", instFamily);
+    readMagicEnum<InstrumentType>(json, "instType", instType);
+    dateRangeStart = readStringAsInt64(json, "dateRangeStart");
+    dateRangeEnd = readStringAsInt64(json, "dateRangeEnd");
+    readValue<std::string>(json, "groupSizeMB", groupSizeMB);
+
+    if (json.contains("groupDetails") && json["groupDetails"].is_array()) {
+        for (const auto &el: json["groupDetails"].items()) {
+            MarketDataFileInfo fileInfo;
+            fileInfo.fromJson(el.value());
+            groupDetails.push_back(fileInfo);
+        }
+    }
+}
+
+nlohmann::json MarketDataHistory::toJson() const {
+    nlohmann::json json;
+    json["ts"] = std::to_string(ts);
+    json["totalSizeMB"] = totalSizeMB;
+    json["dateAggrType"] = magic_enum::enum_name(dateAggrType);
+
+    nlohmann::json detailsJson = nlohmann::json::array();
+    for (const auto &detail: details) {
+        detailsJson.push_back(detail.toJson());
+    }
+    json["details"] = detailsJson;
+
+    return json;
+}
+
+void MarketDataHistory::fromJson(const nlohmann::json &json) {
+    Response::fromJson(json);
+
+    // The response has data as array with one element containing the actual data
+    if (!data.empty() && data.is_array()) {
+        const auto &dataElement = data[0];
+
+        ts = readStringAsInt64(dataElement, "ts");
+        readValue<std::string>(dataElement, "totalSizeMB", totalSizeMB);
+        readMagicEnum<DateAggrType>(dataElement, "dateAggrType", dateAggrType);
+
+        if (dataElement.contains("details") && dataElement["details"].is_array()) {
+            for (const auto &el: dataElement["details"].items()) {
+                MarketDataGroupDetail detail;
+                detail.fromJson(el.value());
+                details.push_back(detail);
+            }
+        }
+    }
+}
 }

@@ -30,12 +30,16 @@ public:
 
     ~HTTPSession();
 
-    [[nodiscard]] http::response<http::string_body> get(const std::string &path,
-                                                        const std::map<std::string, std::string> &parameters,
-                                                        bool isPublic = true) const;
+    [[nodiscard]] http::response<http::string_body> get(const std::string &path, const std::map<std::string, std::string> &parameters, bool isPublic = true) const;
 
-    [[nodiscard]] http::response<http::string_body> post(const std::string &path, const nlohmann::json &json,
-                                                         bool isPublic = true) const;
+    [[nodiscard]] http::response<http::string_body> post(const std::string &path, const nlohmann::json &json, bool isPublic = true) const;
+
+    /**
+     * Download binary data from external URL (for ZIP files from static.okx.com)
+     * @param url Full URL including https://
+     * @return Binary data as vector of bytes
+     */
+    static std::vector<std::uint8_t> downloadBinary(const std::string &url);
 };
-}
-#endif //INCLUDE_VK_OKX_HTTP_SESSION_H
+} // namespace vk::okx
+#endif // INCLUDE_VK_OKX_HTTP_SESSION_H

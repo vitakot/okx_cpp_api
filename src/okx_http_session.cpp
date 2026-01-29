@@ -188,4 +188,85 @@ http::response<http::string_body> HTTPSession::P::request(
 
     return response;
 }
+
+std::vector<std::uint8_t> HTTPSession::downloadBinary(const std::string &url) {
+    // Parse URL to extract host and path
+    // Expected format: https://static.okx.com/cdn/okex/traderecords/...
+    std::string host;
+    std::string path;
+
+    const std::string httpsPrefix = "https://";
+    if (url.substr(0, httpsPrefix.size()) != httpsPrefix) {
+        throw std::runtime_error("URL must start with https://");
+    }
+
+    const auto urlWithoutProtocol = url.substr(httpsPrefix.size());
+
+    if (const auto pathStart = urlWithoutProtocol.find('/'); pathStart == std::string::npos) {
+        host = urlWithoutProtocol;
+        path = "/";
+    } else {
+        host = urlWithoutProtocol.substr(0, pathStart);
+        path = urlWithoutProtocol.substr(pathStart);
+    }
+
+    // Create SSL context and connection
+    ssl::context ctx{ssl::context::sslv23_client};
+    ctx.set_default_verify_paths();
+
+    net::io_context ioc;
+    tcp::resolver resolver{ioc};
+    ssl::stream<tcp::socket> stream{ioc, ctx};
+
+    // Set SNI Hostname
+    if (!SSL_set_tlsext_host_name(stream.native_handle(), host.c_str())) {
+        boost::system::error_code ec{
+            static_cast<int>(ERR_get_error()),
+            net::error::get_ssl_category()
+        };
+        throw boost::system::system_error{ec};
+    }
+
+    auto const results = resolver.resolve(host, "443");
+    net::connect(stream.next_layer(), results.begin(), results.end());
+    stream.handshake(ssl::stream_base::client);
+
+    // Prepare GET request
+    http::request<http::string_body> req{http::verb::get, path, 11};
+    req.set(http::field::host, host);
+    req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+
+    // Send request
+    http::write(stream, req);
+
+    // Receive response with dynamic body for binary data
+    beast::flat_buffer buffer;
+    http::response<http::dynamic_body> response;
+    http::read(stream, buffer, response);
+
+    // Check response status
+    if (response.result() != http::status::ok) {
+        throw std::runtime_error(
+            fmt::format("Failed to download file, HTTP status: {}", response.result_int()));
+    }
+
+    // Convert dynamic body to vector
+    const auto &body = response.body();
+    std::vector<std::uint8_t> result;
+    result.reserve(body.size());
+
+    for (const auto &buf: body.data()) {
+        const auto *data = static_cast<const std::uint8_t *>(buf.data());
+        result.insert(result.end(), data, data + buf.size());
+    }
+
+    // Shutdown connection
+    boost::system::error_code ec;
+    stream.shutdown(ec);
+    if (ec == boost::asio::error::eof) {
+        ec.assign(0, ec.category());
+    }
+
+    return result;
+}
 }

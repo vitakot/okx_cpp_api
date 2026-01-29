@@ -9,6 +9,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include "vk/okx/okx_rest_client.h"
 #include "vk/okx/okx_http_session.h"
 #include "vk/okx/okx.h"
+#include "vk/okx/okx_market_data_utils.h"
 #include "vk/utils/utils.h"
 #include "vk/utils/magic_enum_wrapper.hpp"
 #include <mutex>
@@ -23,8 +24,7 @@ ValueType handleOKXResponse(const http::response<http::string_body> &response) {
     retVal.fromJson(nlohmann::json::parse(response.body()));
 
     if (std::stoi(retVal.code) != 0) {
-        throw std::runtime_error(
-            fmt::format("OKX API error, code: {}, msg: {}", retVal.code, retVal.msg).c_str());
+        throw std::runtime_error(fmt::format("OKX API error, code: {}, msg: {}", retVal.code, retVal.msg).c_str());
     }
 
     return retVal;
@@ -36,14 +36,11 @@ struct RateLimiter {
     const size_t m_limit;
     const std::int64_t m_windowSizeMs;
 
-    RateLimiter(const size_t limit, const std::int64_t windowMs)
-        : m_limit(limit), m_windowSizeMs(windowMs) {
-    }
+    RateLimiter(const size_t limit, const std::int64_t windowMs) : m_limit(limit), m_windowSizeMs(windowMs) {}
 
     void wait() {
         std::unique_lock lock(m_mutex);
-        auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
         // Remove old requests
         while (!m_requestTimes.empty() && (now - m_requestTimes.front() > m_windowSizeMs)) {
@@ -58,8 +55,7 @@ struct RateLimiter {
                 std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
 
                 // Update now after sleep
-                now = std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::system_clock::now().time_since_epoch()).count();
+                now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
                 while (!m_requestTimes.empty() && (now - m_requestTimes.front() > m_windowSizeMs)) {
                     m_requestTimes.pop_front();
                 }
@@ -79,9 +75,7 @@ public:
     RESTClient *parent = nullptr;
     std::shared_ptr<HTTPSession> httpSession;
 
-    explicit P(RESTClient *parent) {
-        this->parent = parent;
-    }
+    explicit P(RESTClient *parent) { this->parent = parent; }
 
     [[nodiscard]] Instruments getInstruments() const {
         std::lock_guard lk(m_locker);
@@ -100,30 +94,23 @@ public:
 
     static http::response<http::string_body> checkResponse(const http::response<http::string_body> &response) {
         if (response.result() != http::status::ok) {
-            throw std::runtime_error(
-                fmt::format("Bad response, code {}, msg: {}", response.result_int(), response.body()).c_str());
+            throw std::runtime_error(fmt::format("Bad response, code {}, msg: {}", response.result_int(), response.body()).c_str());
         }
         return response;
     }
 
-    std::vector<Candle>
-    getHistoricalPrices(const std::string &instId, BarSize barSize, std::int64_t from, std::int64_t to,
-                        std::int32_t limit) const;
+    std::vector<Candle> getHistoricalPrices(const std::string &instId, BarSize barSize, std::int64_t from, std::int64_t to, std::int32_t limit) const;
 
-    std::vector<FundingRate>
-    getFundingRates(const std::string &instId, int64_t from, int64_t to, int limit) const;
+    std::vector<FundingRate> getFundingRates(const std::string &instId, int64_t from, int64_t to, int limit) const;
 };
 
-RESTClient::RESTClient(const std::string &apiKey, const std::string &apiSecret, const std::string &passphrase) : m_p(
-    std::make_unique<P>(this)) {
+RESTClient::RESTClient(const std::string &apiKey, const std::string &apiSecret, const std::string &passphrase) : m_p(std::make_unique<P>(this)) {
     m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret, passphrase);
 }
 
 RESTClient::~RESTClient() = default;
 
-void
-RESTClient::setCredentials(const std::string &apiKey, const std::string &apiSecret,
-                           const std::string &passphrase) const {
+void RESTClient::setCredentials(const std::string &apiKey, const std::string &apiSecret, const std::string &passphrase) const {
     m_p->httpSession.reset();
     m_p->httpSession = std::make_shared<HTTPSession>(apiKey, apiSecret, passphrase);
 }
@@ -152,14 +139,10 @@ std::vector<Instrument> RESTClient::getInstruments(const InstrumentType instrume
     return m_p->getInstruments().instruments;
 }
 
-void RESTClient::setInstruments(const std::vector<Instrument> &instruments) const {
-    m_p->setInstruments(instruments);
-}
+void RESTClient::setInstruments(const std::vector<Instrument> &instruments) const { m_p->setInstruments(instruments); }
 
-std::vector<Candle>
-RESTClient::P::getHistoricalPrices(const std::string &instId, const BarSize barSize, const std::int64_t from,
-                                   const std::int64_t to,
-                                   const std::int32_t limit) const {
+std::vector<Candle> RESTClient::P::getHistoricalPrices(const std::string &instId, const BarSize barSize, const std::int64_t from, const std::int64_t to,
+                                                       const std::int32_t limit) const {
     const std::string path = "/api/v5/market/history-candles";
     std::map<std::string, std::string> parameters;
 
@@ -183,11 +166,8 @@ RESTClient::P::getHistoricalPrices(const std::string &instId, const BarSize barS
     return handleOKXResponse<Candles>(response).candles;
 }
 
-std::vector<Candle>
-RESTClient::getHistoricalPrices(const std::string &instId, const BarSize barSize, const std::int64_t from,
-                                const std::int64_t to,
-                                const std::int32_t limit,
-                                const onCandlesDownloaded &writer) const {
+std::vector<Candle> RESTClient::getHistoricalPrices(const std::string &instId, const BarSize barSize, const std::int64_t from, const std::int64_t to, const std::int32_t limit,
+                                                    const onCandlesDownloaded &writer) const {
     std::vector<Candle> retVal;
     std::vector<Candle> candles;
 
@@ -234,8 +214,7 @@ FundingRate RESTClient::getLastFundingRate(const std::string &instId) const {
     return handleOKXResponse<FundingRate>(response);
 }
 
-std::vector<FundingRate>
-RESTClient::P::getFundingRates(const std::string &instId, const int64_t from, const int64_t to, const int limit) const {
+std::vector<FundingRate> RESTClient::P::getFundingRates(const std::string &instId, const int64_t from, const int64_t to, const int limit) const {
     const std::string path = "/api/v5/public/funding-rate-history";
     std::map<std::string, std::string> parameters;
 
@@ -257,8 +236,7 @@ RESTClient::P::getFundingRates(const std::string &instId, const int64_t from, co
     return handleOKXResponse<FundingRates>(response).rates;
 }
 
-std::vector<FundingRate>
-RESTClient::getFundingRates(const std::string &instId, const int64_t from, const int64_t to, const int limit) const {
+std::vector<FundingRate> RESTClient::getFundingRates(const std::string &instId, const int64_t from, const int64_t to, const int limit) const {
     std::vector<FundingRate> retVal;
     std::vector<FundingRate> rates;
 
@@ -314,8 +292,7 @@ std::vector<Position> RESTClient::getPositions(const InstrumentType instrumentTy
     return handleOKXResponse<Positions>(response).positions;
 }
 
-std::vector<OrderResponse>
-RESTClient::cancelOrder(const std::string &instId, const std::string &clientOrderId, const std::string &orderId) const {
+std::vector<OrderResponse> RESTClient::cancelOrder(const std::string &instId, const std::string &clientOrderId, const std::string &orderId) const {
     const std::string path = "/api/v5/trade/cancel-order";
 
     nlohmann::json json;
@@ -333,8 +310,7 @@ std::vector<OrderResponse> RESTClient::placeOrder(const Order &order) const {
     return handleOKXResponse<OrderResponses>(response).orderResponses;
 }
 
-std::vector<OrderDetail> RESTClient::getOrderDetail(const std::string &instId, const std::string &clientOrderId,
-                                                    const std::string &orderId) const {
+std::vector<OrderDetail> RESTClient::getOrderDetail(const std::string &instId, const std::string &clientOrderId, const std::string &orderId) const {
     const std::string path = "/api/v5/trade/order";
     std::map<std::string, std::string> parameters;
 
@@ -345,4 +321,87 @@ std::vector<OrderDetail> RESTClient::getOrderDetail(const std::string &instId, c
     const auto response = P::checkResponse(m_p->httpSession->get(path, parameters, false));
     return handleOKXResponse<OrderDetails>(response).orderDetails;
 }
+
+MarketDataHistory RESTClient::getMarketDataHistory(
+    const MarketDataModule module,
+    const InstrumentType instType,
+    const std::string &instFamilyOrIdList,
+    const DateAggrType dateAggrType,
+    const std::int64_t begin,
+    const std::int64_t end) const {
+
+    const std::string path = "/api/v5/public/market-data-history";
+    std::map<std::string, std::string> parameters;
+
+    // Module as number string
+    parameters.insert_or_assign("module", std::to_string(static_cast<std::int32_t>(module)));
+
+    // Instrument type
+    parameters.insert_or_assign("instType", std::string(magic_enum::enum_name(instType)));
+
+    // For SPOT use instIdList, for others use instFamilyList
+    if (instType == InstrumentType::SPOT) {
+        parameters.insert_or_assign("instIdList", instFamilyOrIdList);
+    } else {
+        parameters.insert_or_assign("instFamilyList", instFamilyOrIdList);
+    }
+
+    // Date aggregation type
+    parameters.insert_or_assign("dateAggrType", std::string(magic_enum::enum_name(dateAggrType)));
+
+    // Timestamps
+    parameters.insert_or_assign("begin", std::to_string(begin));
+    parameters.insert_or_assign("end", std::to_string(end));
+
+    const auto response = P::checkResponse(m_p->httpSession->get(path, parameters));
+    return handleOKXResponse<MarketDataHistory>(response);
 }
+
+std::vector<std::uint8_t> RESTClient::downloadMarketDataFile(const std::string &url) const {
+    return m_p->httpSession->downloadBinary(url);
+}
+
+std::vector<Candle> RESTClient::downloadAndParseHistoricalCandles(
+    const InstrumentType instType,
+    const std::string &instFamily,
+    const DateAggrType dateAggrType,
+    const std::int64_t begin,
+    const std::int64_t end) const {
+
+    // Get download URLs
+    const auto history = getMarketDataHistory(
+        MarketDataModule::Candles1m,
+        instType,
+        instFamily,
+        dateAggrType,
+        begin,
+        end);
+
+    std::vector<Candle> allCandles;
+
+    // Process each group detail
+    for (const auto &detail: history.details) {
+        // Download and parse each file
+        for (const auto &fileInfo: detail.groupDetails) {
+            // Download ZIP file
+            const auto zipData = downloadMarketDataFile(fileInfo.url);
+
+            // Extract CSV from ZIP
+            const auto csvData = utils::extractZip(zipData);
+
+            // Parse CSV to candles
+            auto candles = utils::parseCandlesCsv(csvData);
+
+            // Append to result
+            allCandles.insert(allCandles.end(), candles.begin(), candles.end());
+        }
+    }
+
+    // Sort by timestamp
+    std::ranges::sort(allCandles, [](const Candle &a, const Candle &b) {
+        return a.ts < b.ts;
+    });
+
+    return allCandles;
+}
+} // namespace vk::okx
