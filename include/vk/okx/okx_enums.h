@@ -134,6 +134,22 @@ enum class CandlestickChannel : std::int32_t {
     candle1M,
     candle3M
 };
+
+/// Market data module type for historical data endpoint
+enum class MarketDataModule : std::int32_t {
+    Trades = 1,
+    Candles1m = 2,
+    FundingRate = 3,
+    Orderbook400 = 4,
+    Orderbook5000 = 5,
+    Orderbook50 = 6
+};
+
+/// Date aggregation type for historical data
+enum class DateAggrType : std::int32_t {
+    daily,
+    monthly
+};
 }
 
 template<>

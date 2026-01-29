@@ -19,6 +19,22 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(magic_enum REQUIRED)
 
+# Fetch minizip-ng for ZIP extraction
+include(FetchContent)
+
+FetchContent_Declare(
+        minizip-ng
+        GIT_REPOSITORY https://github.com/zlib-ng/minizip-ng
+        GIT_TAG        4.0.7
+        OVERRIDE_FIND_PACKAGE
+)
+
+set(MZ_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(MZ_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(MZ_COMPAT ON CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(minizip-ng)
+
 include_directories(include vk_cpp_common/include SYSTEM ${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
 if (NOT TARGET vk_common)
@@ -27,6 +43,7 @@ endif ()
 
 set(HEADERS
         include/vk/okx/okx.h
+        include/vk/okx/okx_enums.h
         include/vk/okx/okx_models.h
         include/vk/okx/okx_rest_client.h
         include/vk/okx/okx_http_session.h
@@ -34,7 +51,9 @@ set(HEADERS
         include/vk/okx/okx_ws_client.h
         include/vk/okx/okx_ws_session.h
         include/vk/okx/okx_ws_stream_manager.h
-        include/vk/okx/okx_futures_exchange_connector.h)
+        include/vk/okx/okx_futures_exchange_connector.h
+        include/vk/okx/okx_market_data_utils.h
+)
 
 set(SOURCES
         src/okx.cpp
@@ -46,7 +65,8 @@ set(SOURCES
         src/okx_rest_client.cpp
         src/okx_http_session.cpp
         src/okx_futures_exchange_connector.cpp
-        include/vk/okx/okx_enums.h)
+        src/okx_market_data_utils.cpp
+        )
 
 if (MODULE_MANAGER)
     add_library(okx_api SHARED ${SOURCES} ${HEADERS})
@@ -57,4 +77,4 @@ else ()
     target_link_libraries(okx_test PRIVATE spdlog::spdlog_header_only okx_api)
 endif ()
 
-target_link_libraries(okx_api PRIVATE spdlog::spdlog_header_only OpenSSL::Crypto OpenSSL::SSL vk_common nlohmann_json::nlohmann_json)
+target_link_libraries(okx_api PRIVATE spdlog::spdlog_header_only OpenSSL::Crypto OpenSSL::SSL vk_common nlohmann_json::nlohmann_json MINIZIP::minizip)

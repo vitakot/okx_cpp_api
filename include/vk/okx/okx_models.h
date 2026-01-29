@@ -422,6 +422,71 @@ struct OrderDetails final : Response {
 
     void fromJson(const nlohmann::json &json) override;
 };
+/// Single file info from market data history response
+struct MarketDataFileInfo final : IJson {
+    /// Data file name, e.g. BTC-USDT-SWAP-trades-2025-05-15.zip
+    std::string filename{};
+
+    /// Data date timestamp, Unix timestamp format in milliseconds
+    std::int64_t dateTs{};
+
+    /// File size in MB
+    std::string sizeMB{};
+
+    /// Download URL
+    std::string url{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+/// Group detail containing files for a specific instrument
+struct MarketDataGroupDetail final : IJson {
+    /// Instrument ID (for SPOT)
+    std::string instId{};
+
+    /// Instrument family (for non-SPOT)
+    std::string instFamily{};
+
+    /// Instrument type
+    InstrumentType instType{InstrumentType::SWAP};
+
+    /// Data range start date, Unix timestamp format in milliseconds (inclusive)
+    std::int64_t dateRangeStart{};
+
+    /// Data range end date, Unix timestamp format in milliseconds (inclusive)
+    std::int64_t dateRangeEnd{};
+
+    /// Data group size in MB
+    std::string groupSizeMB{};
+
+    /// List of downloadable files
+    std::vector<MarketDataFileInfo> groupDetails{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
+
+/// Response from /api/v5/public/market-data-history endpoint
+struct MarketDataHistory final : Response {
+    /// Response timestamp, Unix timestamp format in milliseconds
+    std::int64_t ts{};
+
+    /// Total size of all data files in MB
+    std::string totalSizeMB{};
+
+    /// Date aggregation type (daily or monthly)
+    DateAggrType dateAggrType{DateAggrType::daily};
+
+    /// List of group details
+    std::vector<MarketDataGroupDetail> details{};
+
+    [[nodiscard]] nlohmann::json toJson() const override;
+
+    void fromJson(const nlohmann::json &json) override;
+};
 }
 
 #endif //INCLUDE_VK_OKX_MODELS_H

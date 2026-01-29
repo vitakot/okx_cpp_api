@@ -144,6 +144,53 @@ public:
      */
     [[nodiscard]] std::vector<OrderDetail>
     getOrderDetail(const std::string &instId, const std::string &clientOrderId, const std::string &orderId = "") const;
+
+    /**
+     * Get download URLs for historical market data.
+     * @param module Data module type (Trades, Candles1m, FundingRate, etc.)
+     * @param instType Instrument type (SPOT, SWAP, FUTURES, OPTION)
+     * @param instFamilyOrIdList Instrument family (for non-SPOT) or ID list (for SPOT), or "ANY" for all
+     * @param dateAggrType Date aggregation type (daily or monthly)
+     * @param begin Begin timestamp in ms (inclusive)
+     * @param end End timestamp in ms (inclusive), max range: 20 days for daily, 20 months for monthly
+     * @return MarketDataHistory with download URLs
+     * @throws nlohmann::json::exception, std::exception
+     * @see https://www.okx.com/docs-v5/en/#public-data-rest-api-get-historical-market-data
+     */
+    [[nodiscard]] MarketDataHistory getMarketDataHistory(
+        MarketDataModule module,
+        InstrumentType instType,
+        const std::string &instFamilyOrIdList,
+        DateAggrType dateAggrType,
+        std::int64_t begin,
+        std::int64_t end) const;
+
+    /**
+     * Download ZIP file from URL and return raw bytes.
+     * @param url Full URL to the ZIP file (from MarketDataHistory response)
+     * @return Raw ZIP file bytes
+     * @throws std::runtime_error if download fails
+     */
+    [[nodiscard]] std::vector<std::uint8_t> downloadMarketDataFile(const std::string &url) const;
+
+    /**
+     * Download, extract and parse historical candlestick data.
+     * This is a high-level convenience method that combines getMarketDataHistory,
+     * downloadMarketDataFile, ZIP extraction and CSV parsing.
+     * @param instType Instrument type (SPOT, SWAP, FUTURES, OPTION)
+     * @param instFamily Instrument family (e.g., "BTC-USDT")
+     * @param dateAggrType Date aggregation type (daily or monthly)
+     * @param begin Begin timestamp in ms
+     * @param end End timestamp in ms
+     * @return Vector of Candle structures from all downloaded files
+     * @throws std::runtime_error if any step fails
+     */
+    [[nodiscard]] std::vector<Candle> downloadAndParseHistoricalCandles(
+        InstrumentType instType,
+        const std::string &instFamily,
+        DateAggrType dateAggrType,
+        std::int64_t begin,
+        std::int64_t end) const;
 };
 }
 
