@@ -15,6 +15,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <mz_strm_mem.h>
 #include <mz_zip.h>
 #include <mz_zip_rw.h>
+#include <spdlog/spdlog.h>
 
 namespace vk::okx::utils {
 
@@ -101,8 +102,15 @@ std::vector<Candle> parseCandlesCsv(const std::string &csvContent) {
     std::istringstream stream(csvContent);
     std::string line;
     bool isFirstLine = true;
+    int linesProcessed = 0;
+    int linesSkipped = 0;
 
     while (std::getline(stream, line)) {
+        // Handle Windows line endings (remove trailing \r)
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+
         // Skip empty lines
         if (line.empty()) {
             continue;
@@ -126,16 +134,35 @@ std::vector<Candle> parseCandlesCsv(const std::string &csvContent) {
             fields.push_back(field);
         }
 
-        if (fields.size() < 9) {
+        // OKX market data history CSV format (10 fields):
+        // instrument_name,open,high,low,close,vol,vol_ccy,vol_quote,open_time,confirm
+        if (fields.size() < 10) {
+            if (linesSkipped < 5) {
+                spdlog::warn("CSV line has {} fields (expected 10): {}", fields.size(), line);
+            }
+            linesSkipped++;
             continue; // Skip malformed lines
         }
+
+        linesProcessed++;
 
         try {
             Candle candle;
 
-            // Parse timestamp
+            // fields[0] = instrument_name (skip)
+            // fields[1] = open
+            // fields[2] = high
+            // fields[3] = low
+            // fields[4] = close
+            // fields[5] = vol
+            // fields[6] = vol_ccy (may be "None")
+            // fields[7] = vol_quote (may be "None")
+            // fields[8] = open_time (timestamp)
+            // fields[9] = confirm
+
+            // Parse timestamp from open_time field
             std::int64_t ts = 0;
-            auto [ptr, ec] = std::from_chars(fields[0].data(), fields[0].data() + fields[0].size(), ts);
+            auto [ptr, ec] = std::from_chars(fields[8].data(), fields[8].data() + fields[8].size(), ts);
             if (ec == std::errc()) {
                 candle.ts = ts;
             }
@@ -146,17 +173,32 @@ std::vector<Candle> parseCandlesCsv(const std::string &csvContent) {
             candle.l = boost::multiprecision::cpp_dec_float_50(fields[3]);
             candle.c = boost::multiprecision::cpp_dec_float_50(fields[4]);
 
-            // Parse volume values
+            // Parse volume - always present
             candle.vol = boost::multiprecision::cpp_dec_float_50(fields[5]);
-            candle.volCcy = boost::multiprecision::cpp_dec_float_50(fields[6]);
-            candle.volCcyQuote = boost::multiprecision::cpp_dec_float_50(fields[7]);
+
+            // Parse vol_ccy and vol_quote - may be "None"
+            if (fields[6] != "None" && !fields[6].empty()) {
+                candle.volCcy = boost::multiprecision::cpp_dec_float_50(fields[6]);
+            } else {
+                candle.volCcy = 0;
+            }
+
+            if (fields[7] != "None" && !fields[7].empty()) {
+                candle.volCcyQuote = boost::multiprecision::cpp_dec_float_50(fields[7]);
+            } else {
+                candle.volCcyQuote = 0;
+            }
 
             // Parse confirm flag
-            candle.confirm = (fields[8] == "1" || fields[8] == "true" || fields[8] == "True");
+            candle.confirm = (fields[9] == "1" || fields[9] == "true" || fields[9] == "True");
 
             candles.push_back(candle);
-        } catch (const std::exception &) {
-            // Skip lines that fail to parse
+        } catch (const std::exception &e) {
+            // Log first few parse errors
+            if (linesSkipped < 5) {
+                spdlog::warn("Failed to parse CSV line: {} - error: {}", line, e.what());
+            }
+            linesSkipped++;
             continue;
         }
     }
