@@ -69,9 +69,10 @@ struct RESTClient::P {
 private:
     Instruments m_instruments;
     mutable std::recursive_mutex m_locker;
-    mutable RateLimiter m_klineLimiter{20, 2000};
 
 public:
+    mutable RateLimiter m_klineLimiter{20, 2000};
+    mutable RateLimiter m_marketDataHistoryLimiter{1, 1000}; // 1 request per second for market-data-history (conservative)
     RESTClient *parent = nullptr;
     std::shared_ptr<HTTPSession> httpSession;
 
@@ -353,6 +354,7 @@ MarketDataHistory RESTClient::getMarketDataHistory(
     parameters.insert_or_assign("begin", std::to_string(begin));
     parameters.insert_or_assign("end", std::to_string(end));
 
+    m_p->m_marketDataHistoryLimiter.wait();
     const auto response = P::checkResponse(m_p->httpSession->get(path, parameters));
     return handleOKXResponse<MarketDataHistory>(response);
 }
