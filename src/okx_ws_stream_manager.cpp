@@ -23,33 +23,32 @@ using namespace std::chrono_literals;
 
 namespace vk::okx {
 struct WSStreamManager::P {
-    std::unique_ptr<WebSocketClient> m_wsClient;
-    int m_timeout = 5;
-    mutable std::recursive_mutex m_tickersLocker;
-    mutable std::recursive_mutex m_candlestickLocker;
-    std::map<std::string, DataEventTicker> m_tickers;
-    std::map<std::string, std::map<BarSize, DataEventCandlestick> > m_candlesticks;
-
-    onLogMessage m_logMessageCB;
+    std::unique_ptr<WebSocketClient> wsClient;
+    int timeout = 5;
+    mutable std::recursive_mutex tickersLocker;
+    mutable std::recursive_mutex candlestickLocker;
+    std::map<std::string, DataEventTicker> tickers;
+    std::map<std::string, std::map<BarSize, DataEventCandlestick> > candlesticks;
+    onLogMessage logMessageCB;
 
     explicit P() {
-        m_wsClient = std::make_unique<WebSocketClient>();
-        m_wsClient->setDataEventCallback([&](const DataEvent &event) {
+        wsClient = std::make_unique<WebSocketClient>();
+        wsClient->setDataEventCallback([&](const DataEvent &event) {
             if (event.channel == "tickers") {
-                std::lock_guard lk(m_tickersLocker);
+                std::lock_guard lk(tickersLocker);
 
                 try {
                     DataEventTicker dataEventTicker;
                     dataEventTicker.fromJson(event.data);
 
-                    if (const auto it = m_tickers.find(event.instId); it == m_tickers.end()) {
-                        m_tickers.insert_or_assign(event.instId, dataEventTicker);
+                    if (const auto it = tickers.find(event.instId); it == tickers.end()) {
+                        tickers.insert_or_assign(event.instId, dataEventTicker);
                     }
                 } catch (std::exception &e) {
-                    m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, e.what()));
+                    logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, e.what()));
                 }
             } else if (event.channel.find("candle") != std::string::npos) {
-                std::lock_guard lk(m_candlestickLocker);
+                std::lock_guard lk(candlestickLocker);
 
                 try {
                     DataEventCandlestick eventCandlestick;
@@ -57,19 +56,19 @@ struct WSStreamManager::P {
 
                     /// Insert new candle
                     {
-                        auto it = m_candlesticks.find(event.instId);
+                        auto it = candlesticks.find(event.instId);
 
-                        if (it == m_candlesticks.end()) {
-                            m_candlesticks.insert({event.instId, {}});
+                        if (it == candlesticks.end()) {
+                            candlesticks.insert({event.instId, {}});
                         }
 
-                        it = m_candlesticks.find(event.instId);
+                        it = candlesticks.find(event.instId);
                         it->second.insert_or_assign(OKX::candlestickChannelToBarSize(
                                                         *magic_enum::enum_cast<CandlestickChannel>(
                                                             event.channel)), eventCandlestick);
                     }
                 } catch (std::exception &e) {
-                    m_logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, e.what()));
+                    logMessageCB(LogSeverity::Error, fmt::format("{}: {}", MAKE_FILELINE, e.what()));
                 }
             }
         });
@@ -80,8 +79,8 @@ WSStreamManager::WSStreamManager() : m_p(std::make_unique<P>()) {
 }
 
 WSStreamManager::~WSStreamManager() {
-    m_p->m_wsClient.reset();
-    m_p->m_timeout = 0;
+    m_p->wsClient.reset();
+    m_p->timeout = 0;
 }
 
 void WSStreamManager::subscribeTickersStream(const std::string &instId) const {
@@ -89,17 +88,17 @@ void WSStreamManager::subscribeTickersStream(const std::string &instId) const {
     wsSubscription.instId = instId;
     wsSubscription.channel = "tickers";
 
-    if (std::string subscriptionRequest = wsSubscription.toJson().dump(); !m_p->m_wsClient->isSubscribed(
+    if (std::string subscriptionRequest = wsSubscription.toJson().dump(); !m_p->wsClient->isSubscribed(
         subscriptionRequest)) {
-        if (m_p->m_logMessageCB) {
+        if (m_p->logMessageCB) {
             const auto msgString = fmt::format("subscribing: {}", subscriptionRequest);
-            m_p->m_logMessageCB(LogSeverity::Info, msgString);
+            m_p->logMessageCB(LogSeverity::Info, msgString);
         }
 
-        m_p->m_wsClient->subscribe(subscriptionRequest);
+        m_p->wsClient->subscribe(subscriptionRequest);
     }
 
-    m_p->m_wsClient->run();
+    m_p->wsClient->run();
 }
 
 void WSStreamManager::subscribeCandlestickStream(const std::string &instId, const BarSize barSize) const {
@@ -107,50 +106,50 @@ void WSStreamManager::subscribeCandlestickStream(const std::string &instId, cons
     wsSubscription.instId = instId;
     wsSubscription.channel = magic_enum::enum_name(OKX::barSizeToCandlestickChannel(barSize));
 
-    if (std::string subscriptionRequest = wsSubscription.toJson().dump(); !m_p->m_wsClient->isSubscribed(
+    if (std::string subscriptionRequest = wsSubscription.toJson().dump(); !m_p->wsClient->isSubscribed(
         subscriptionRequest)) {
-        if (m_p->m_logMessageCB) {
+        if (m_p->logMessageCB) {
             const auto msgString = fmt::format("subscribing: {}", subscriptionRequest);
-            m_p->m_logMessageCB(LogSeverity::Info, msgString);
+            m_p->logMessageCB(LogSeverity::Info, msgString);
         }
 
-        m_p->m_wsClient->subscribe(subscriptionRequest);
+        m_p->wsClient->subscribe(subscriptionRequest);
     }
 
-    m_p->m_wsClient->run();
+    m_p->wsClient->run();
 }
 
 void WSStreamManager::setTimeout(const int seconds) const {
-    m_p->m_timeout = seconds;
+    m_p->timeout = seconds;
 }
 
 int WSStreamManager::timeout() const {
-    return m_p->m_timeout;
+    return m_p->timeout;
 }
 
 void WSStreamManager::setLoggerCallback(const onLogMessage &onLogMessageCB) const {
-    m_p->m_logMessageCB = onLogMessageCB;
-    m_p->m_wsClient->setLoggerCallback(onLogMessageCB);
+    m_p->logMessageCB = onLogMessageCB;
+    m_p->wsClient->setLoggerCallback(onLogMessageCB);
 }
 
 std::optional<DataEventTicker> WSStreamManager::readEventInstrumentInfo(const std::string &instId) const {
     int numTries = 0;
-    const int maxNumTries = static_cast<int>(m_p->m_timeout / 0.01);
+    const int maxNumTries = static_cast<int>(m_p->timeout / 0.01);
 
     while (numTries <= maxNumTries) {
-        if (m_p->m_timeout == 0) {
+        if (m_p->timeout == 0) {
             /// No need to wait when destroying object
             break;
         }
 
-        m_p->m_tickersLocker.lock();
+        m_p->tickersLocker.lock();
 
-        if (const auto it = m_p->m_tickers.find(instId); it != m_p->m_tickers.end()) {
+        if (const auto it = m_p->tickers.find(instId); it != m_p->tickers.end()) {
             auto retVal = it->second;
-            m_p->m_tickersLocker.unlock();
+            m_p->tickersLocker.unlock();
             return retVal;
         }
-        m_p->m_tickersLocker.unlock();
+        m_p->tickersLocker.unlock();
         numTries++;
         std::this_thread::sleep_for(3ms);
     }
@@ -161,24 +160,24 @@ std::optional<DataEventTicker> WSStreamManager::readEventInstrumentInfo(const st
 std::optional<DataEventCandlestick>
 WSStreamManager::readEventCandlestick(const std::string &instId, const BarSize barSize) const {
     int numTries = 0;
-    const int maxNumTries = static_cast<int>(m_p->m_timeout / 0.01);
+    const int maxNumTries = static_cast<int>(m_p->timeout / 0.01);
 
     while (numTries <= maxNumTries) {
-        if (m_p->m_timeout == 0) {
+        if (m_p->timeout == 0) {
             /// No need to wait when destroying object
             break;
         }
 
-        m_p->m_candlestickLocker.lock();
+        m_p->candlestickLocker.lock();
 
-        if (const auto it = m_p->m_candlesticks.find(instId); it != m_p->m_candlesticks.end()) {
+        if (const auto it = m_p->candlesticks.find(instId); it != m_p->candlesticks.end()) {
             if (const auto itCandle = it->second.find(barSize); itCandle != it->second.end()) {
                 auto retVal = itCandle->second;
-                m_p->m_candlestickLocker.unlock();
+                m_p->candlestickLocker.unlock();
                 return retVal;
             }
         }
-        m_p->m_candlestickLocker.unlock();
+        m_p->candlestickLocker.unlock();
         numTries++;
         std::this_thread::sleep_for(3ms);
     }
