@@ -21,73 +21,74 @@ namespace vk::okx::utils {
 
 std::vector<std::uint8_t> extractZip(const std::vector<std::uint8_t> &zipData) {
     // Create memory stream from input data
-    void *mem_stream = mz_stream_mem_create();
-    if (!mem_stream) {
+    void *memStream = mz_stream_mem_create();
+
+    if (!memStream) {
         throw std::runtime_error("Failed to create memory stream");
     }
 
-    mz_stream_mem_set_buffer(mem_stream, const_cast<void*>(static_cast<const void*>(zipData.data())),
-                             static_cast<int32_t>(zipData.size()));
-    mz_stream_open(mem_stream, nullptr, MZ_OPEN_MODE_READ);
+    mz_stream_mem_set_buffer(memStream, const_cast<void *>(static_cast<const void *>(zipData.data())), static_cast<int32_t>(zipData.size()));
+    mz_stream_open(memStream, nullptr, MZ_OPEN_MODE_READ);
 
     // Create zip reader
-    void *zip_reader = mz_zip_reader_create();
-    if (!zip_reader) {
-        mz_stream_mem_delete(&mem_stream);
+    void *zipReader = mz_zip_reader_create();
+
+    if (!zipReader) {
+        mz_stream_mem_delete(&memStream);
         throw std::runtime_error("Failed to create ZIP reader");
     }
 
-    if (mz_zip_reader_open(zip_reader, mem_stream) != MZ_OK) {
-        mz_zip_reader_delete(&zip_reader);
-        mz_stream_mem_delete(&mem_stream);
+    if (mz_zip_reader_open(zipReader, memStream) != MZ_OK) {
+        mz_zip_reader_delete(&zipReader);
+        mz_stream_mem_delete(&memStream);
         throw std::runtime_error("Failed to open ZIP archive");
     }
 
     // Go to first entry
-    if (mz_zip_reader_goto_first_entry(zip_reader) != MZ_OK) {
-        mz_zip_reader_close(zip_reader);
-        mz_zip_reader_delete(&zip_reader);
-        mz_stream_mem_delete(&mem_stream);
+    if (mz_zip_reader_goto_first_entry(zipReader) != MZ_OK) {
+        mz_zip_reader_close(zipReader);
+        mz_zip_reader_delete(&zipReader);
+        mz_stream_mem_delete(&memStream);
         throw std::runtime_error("ZIP archive is empty");
     }
 
     // Get file info
-    mz_zip_file *file_info = nullptr;
-    if (mz_zip_reader_entry_get_info(zip_reader, &file_info) != MZ_OK) {
-        mz_zip_reader_close(zip_reader);
-        mz_zip_reader_delete(&zip_reader);
-        mz_stream_mem_delete(&mem_stream);
+    mz_zip_file *fileInfo = nullptr;
+
+    if (mz_zip_reader_entry_get_info(zipReader, &fileInfo) != MZ_OK) {
+        mz_zip_reader_close(zipReader);
+        mz_zip_reader_delete(&zipReader);
+        mz_stream_mem_delete(&memStream);
         throw std::runtime_error("Failed to get file info from ZIP");
     }
 
     // Allocate buffer for decompressed data
-    std::vector<std::uint8_t> result(static_cast<size_t>(file_info->uncompressed_size));
+    std::vector<std::uint8_t> result(static_cast<size_t>(fileInfo->uncompressed_size));
 
     // Open and read entry
-    if (mz_zip_reader_entry_open(zip_reader) != MZ_OK) {
-        mz_zip_reader_close(zip_reader);
-        mz_zip_reader_delete(&zip_reader);
-        mz_stream_mem_delete(&mem_stream);
+    if (mz_zip_reader_entry_open(zipReader) != MZ_OK) {
+        mz_zip_reader_close(zipReader);
+        mz_zip_reader_delete(&zipReader);
+        mz_stream_mem_delete(&memStream);
         throw std::runtime_error("Failed to open ZIP entry");
     }
 
-    int32_t bytes_read = mz_zip_reader_entry_read(zip_reader, result.data(),
-                                                   static_cast<int32_t>(result.size()));
+    const int32_t bytes_read = mz_zip_reader_entry_read(zipReader, result.data(), static_cast<int32_t>(result.size()));
     if (bytes_read < 0) {
-        mz_zip_reader_entry_close(zip_reader);
-        mz_zip_reader_close(zip_reader);
-        mz_zip_reader_delete(&zip_reader);
-        mz_stream_mem_delete(&mem_stream);
+        mz_zip_reader_entry_close(zipReader);
+        mz_zip_reader_close(zipReader);
+        mz_zip_reader_delete(&zipReader);
+        mz_stream_mem_delete(&memStream);
         throw std::runtime_error("Failed to extract file from ZIP");
     }
 
     result.resize(static_cast<size_t>(bytes_read));
 
     // Cleanup
-    mz_zip_reader_entry_close(zip_reader);
-    mz_zip_reader_close(zip_reader);
-    mz_zip_reader_delete(&zip_reader);
-    mz_stream_mem_delete(&mem_stream);
+    mz_zip_reader_entry_close(zipReader);
+    mz_zip_reader_close(zipReader);
+    mz_zip_reader_delete(&zipReader);
+    mz_stream_mem_delete(&memStream);
 
     return result;
 }
@@ -162,8 +163,7 @@ std::vector<Candle> parseCandlesCsv(const std::string &csvContent) {
 
             // Parse timestamp from open_time field
             std::int64_t ts = 0;
-            auto [ptr, ec] = std::from_chars(fields[8].data(), fields[8].data() + fields[8].size(), ts);
-            if (ec == std::errc()) {
+            if (auto [ptr, ec] = std::from_chars(fields[8].data(), fields[8].data() + fields[8].size(), ts); ec == std::errc()) {
                 candle.ts = ts;
             }
 
@@ -199,7 +199,6 @@ std::vector<Candle> parseCandlesCsv(const std::string &csvContent) {
                 spdlog::warn("Failed to parse CSV line: {} - error: {}", line, e.what());
             }
             linesSkipped++;
-            continue;
         }
     }
 
@@ -246,18 +245,17 @@ std::vector<FundingRate> parseFundingRateCsv(const std::vector<std::uint8_t> &cs
             // fields[2] is realizedRate - not in our model
 
             std::int64_t fundingTime = 0;
-            auto [ptr, ec] = std::from_chars(fields[3].data(), fields[3].data() + fields[3].size(), fundingTime);
-            if (ec == std::errc()) {
+            if (auto [ptr, ec] = std::from_chars(fields[3].data(), fields[3].data() + fields[3].size(), fundingTime); ec == std::errc()) {
                 rate.fundingTime = fundingTime;
             }
 
             rates.push_back(rate);
-        } catch (const std::exception &) {
-            continue;
+        } catch (const std::exception &e) {
+            spdlog::warn("Exception in parseFundingRateCsv: {}", e.what());
         }
     }
 
     return rates;
 }
 
-}
+} // namespace vk::okx::utils
