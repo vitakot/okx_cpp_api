@@ -51,7 +51,9 @@ struct RateLimiter {
             const auto oldest = m_requestTimes.front();
 
             if (auto waitTime = (oldest + m_windowSizeMs) - now + 10; waitTime > 0) {
+#ifdef VERBOSE_LOG
                 spdlog::info("Rate limit reached (Local). Waiting for {} ms", waitTime);
+#endif
                 std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
 
                 // Update now after sleep
@@ -71,8 +73,8 @@ private:
     mutable std::recursive_mutex m_locker;
 
 public:
-    mutable RateLimiter m_klineLimiter{20, 2000};
-    mutable RateLimiter m_marketDataHistoryLimiter{1, 1000}; // 1 request per second for market-data-history (conservative)
+    mutable RateLimiter klineLimiter{20, 2000};
+    mutable RateLimiter marketDataHistoryLimiter{1, 1000}; // 1 request per second for market-data-history (conservative)
     RESTClient *parent = nullptr;
     std::shared_ptr<HTTPSession> httpSession;
 
@@ -162,7 +164,7 @@ std::vector<Candle> RESTClient::P::getHistoricalPrices(const std::string &instId
         parameters.insert_or_assign("limit", std::to_string(limit));
     }
 
-    m_klineLimiter.wait();
+    klineLimiter.wait();
     const auto response = checkResponse(httpSession->get(path, parameters));
     return handleOKXResponse<Candles>(response).candles;
 }
@@ -354,13 +356,13 @@ MarketDataHistory RESTClient::getMarketDataHistory(
     parameters.insert_or_assign("begin", std::to_string(begin));
     parameters.insert_or_assign("end", std::to_string(end));
 
-    m_p->m_marketDataHistoryLimiter.wait();
+    m_p->marketDataHistoryLimiter.wait();
     const auto response = P::checkResponse(m_p->httpSession->get(path, parameters));
     return handleOKXResponse<MarketDataHistory>(response);
 }
 
-std::vector<std::uint8_t> RESTClient::downloadMarketDataFile(const std::string &url) const {
-    return m_p->httpSession->downloadBinary(url);
+std::vector<std::uint8_t> RESTClient::downloadMarketDataFile(const std::string &url) {
+    return HTTPSession::downloadBinary(url);
 }
 
 std::vector<Candle> RESTClient::downloadAndParseHistoricalCandles(

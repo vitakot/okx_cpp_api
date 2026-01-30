@@ -171,7 +171,7 @@ public:
      * @return Raw ZIP file bytes
      * @throws std::runtime_error if download fails
      */
-    [[nodiscard]] std::vector<std::uint8_t> downloadMarketDataFile(const std::string &url) const;
+    [[nodiscard]] static std::vector<std::uint8_t> downloadMarketDataFile(const std::string &url);
 
     /**
      * Download, extract and parse historical candlestick data.
