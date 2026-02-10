@@ -163,4 +163,16 @@ std::vector<Ticker> OKXFuturesExchangeConnector::getTickerInfo(const std::string
 std::int64_t OKXFuturesExchangeConnector::getServerTime() const {
     return m_p->restClient->getSystemTime();
 }
+
+std::vector<Position> OKXFuturesExchangeConnector::getPositionInfo(const std::string &symbol) const {
+    throw std::runtime_error("Unimplemented: OKXFuturesExchangeConnector::getPositionInfo");
 }
+
+std::vector<FundingRate> OKXFuturesExchangeConnector::getHistoricalFundingRates(const std::string &symbol, std::int64_t startTime, std::int64_t endTime) const {
+    throw std::runtime_error("Unimplemented: OKXFuturesExchangeConnector::getHistoricalFundingRates");
+}
+
+std::vector<Candle> OKXFuturesExchangeConnector::getHistoricalCandles(const std::string &symbol, CandleInterval interval, std::int64_t startTime, std::int64_t endTime) const {
+    throw std::runtime_error("Unimplemented: OKXFuturesExchangeConnector::getHistoricalCandles");
+}
+} // namespace vk
