@@ -47,6 +47,12 @@ public:
 
     [[nodiscard]] std::int64_t getServerTime() const override;
 
+    [[nodiscard]] std::vector<Position> getPositionInfo(const std::string& symbol) const override;
+
+    [[nodiscard]] std::vector<FundingRate> getHistoricalFundingRates(const std::string &symbol, std::int64_t startTime, std::int64_t endTime) const override;
+
+    [[nodiscard]] std::vector<Candle> getHistoricalCandles(const std::string &symbol, CandleInterval interval, std::int64_t startTime, std::int64_t endTime) const override;
+
     static std::shared_ptr<IExchangeConnector> createInstance() {
         return std::make_shared<OKXFuturesExchangeConnector>();
     }
@@ -56,12 +62,12 @@ public:
 BOOST_SYMBOL_EXPORT IModuleFactory *getModuleFactory() {
     if (!g_moduleFactory) {
         FactoryInfo factoryInfo;
-        factoryInfo.m_id = std::string(magic_enum::enum_name(ExchangeId::OKXFutures));
+        factoryInfo.m_id = std::string(magic_enum::enum_name(IExchangeConnector::ExchangeId::OKXFutures));
         factoryInfo.m_description = "OKX CEX - Futures";
 
         g_moduleFactory = new ModuleFactory(factoryInfo);
         g_moduleFactory->registerClassByName<IExchangeConnector>(
-            std::string(magic_enum::enum_name(ExchangeId::OKXFutures)),
+            std::string(magic_enum::enum_name(IExchangeConnector::ExchangeId::OKXFutures)),
             &OKXFuturesExchangeConnector::createInstance);
     } else {
         return nullptr;
