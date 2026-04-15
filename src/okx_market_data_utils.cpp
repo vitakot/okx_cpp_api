@@ -15,6 +15,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
 #include <mz_strm_mem.h>
 #include <mz_zip.h>
 #include <mz_zip_rw.h>
+#include <set>
 #include <spdlog/spdlog.h>
 
 namespace vk::okx::utils {
@@ -100,6 +101,7 @@ std::vector<Candle> parseCandlesCsv(const std::vector<std::uint8_t> &csvData) {
 
 std::vector<Candle> parseCandlesCsv(const std::string &csvContent) {
     std::vector<Candle> candles;
+    std::set<std::int64_t> seenTimestamps;
     std::istringstream stream(csvContent);
     std::string line;
     bool isFirstLine = true;
@@ -191,6 +193,17 @@ std::vector<Candle> parseCandlesCsv(const std::string &csvContent) {
 
             // Parse confirm flag
             candle.confirm = (fields[9] == "1" || fields[9] == "true" || fields[9] == "True");
+
+            // Skip unconfirmed candles
+            if (!candle.confirm) {
+                continue;
+            }
+
+            // OKX ZIP files contain duplicate rows per candle - deduplicate by timestamp
+            if (seenTimestamps.contains(candle.ts)) {
+                continue;
+            }
+            seenTimestamps.insert(candle.ts);
 
             candles.push_back(candle);
         } catch (const std::exception &e) {
