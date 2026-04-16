@@ -222,11 +222,17 @@ std::vector<FundingRate> parseFundingRateCsv(const std::vector<std::uint8_t> &cs
     const std::string csvContent(reinterpret_cast<const char *>(csvData.data()), csvData.size());
 
     std::vector<FundingRate> rates;
+    std::set<std::int64_t> seenTimestamps;
     std::istringstream stream(csvContent);
     std::string line;
     bool isFirstLine = true;
 
     while (std::getline(stream, line)) {
+        // Handle Windows line endings
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+
         if (line.empty()) {
             continue;
         }
@@ -238,7 +244,9 @@ std::vector<FundingRate> parseFundingRateCsv(const std::vector<std::uint8_t> &cs
             }
         }
 
-        // Parse CSV line: instId,fundingRate,realizedRate,fundingTime
+        // Parse CSV line - two formats supported:
+        // Bulk download (3 fields): instrument_name,funding_rate,funding_time
+        // REST API     (4 fields): instId,fundingRate,realizedRate,fundingTime
         std::istringstream lineStream(line);
         std::string field;
         std::vector<std::string> fields;
@@ -247,7 +255,7 @@ std::vector<FundingRate> parseFundingRateCsv(const std::vector<std::uint8_t> &cs
             fields.push_back(field);
         }
 
-        if (fields.size() < 4) {
+        if (fields.size() < 3) {
             continue;
         }
 
@@ -255,12 +263,20 @@ std::vector<FundingRate> parseFundingRateCsv(const std::vector<std::uint8_t> &cs
             FundingRate rate;
             rate.instId = fields[0];
             rate.fundingRate = boost::multiprecision::cpp_dec_float_50(fields[1]);
-            // fields[2] is realizedRate - not in our model
+
+            // Determine funding_time field position based on number of fields
+            const auto &timeField = (fields.size() >= 4) ? fields[3] : fields[2];
 
             std::int64_t fundingTime = 0;
-            if (auto [ptr, ec] = std::from_chars(fields[3].data(), fields[3].data() + fields[3].size(), fundingTime); ec == std::errc()) {
+            if (auto [ptr, ec] = std::from_chars(timeField.data(), timeField.data() + timeField.size(), fundingTime); ec == std::errc()) {
                 rate.fundingTime = fundingTime;
             }
+
+            // Deduplicate by funding_time
+            if (seenTimestamps.contains(rate.fundingTime)) {
+                continue;
+            }
+            seenTimestamps.insert(rate.fundingTime);
 
             rates.push_back(rate);
         } catch (const std::exception &e) {
