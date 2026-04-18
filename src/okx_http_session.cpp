@@ -241,8 +241,10 @@ std::vector<std::uint8_t> HTTPSession::downloadBinary(const std::string &url) {
 
     // Receive response with dynamic body for binary data
     beast::flat_buffer buffer;
-    http::response<http::dynamic_body> response;
-    http::read(stream, buffer, response);
+    http::response_parser<http::dynamic_body> parser;
+    parser.body_limit(boost::none); // Disable default 8MB limit for large ZIP files
+    http::read(stream, buffer, parser);
+    auto response = parser.release();
 
     // Check response status
     if (response.result() != http::status::ok) {
