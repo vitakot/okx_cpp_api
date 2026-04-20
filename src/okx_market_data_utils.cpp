@@ -260,6 +260,9 @@ std::vector<FundingRate> parseFundingRateCsv(const std::vector<std::uint8_t> &cs
         }
 
         try {
+            if (fields[1] == "None" || fields[1].empty()) {
+                continue;
+            }
             FundingRate rate;
             rate.instId = fields[0];
             rate.fundingRate = boost::multiprecision::cpp_dec_float_50(fields[1]);
