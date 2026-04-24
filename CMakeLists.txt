@@ -35,10 +35,10 @@ set(MZ_COMPAT ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(minizip-ng)
 
-include_directories(include vk_cpp_common/include SYSTEM ${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+include_directories(include stonky-cpp-common/include SYSTEM ${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
-if (NOT TARGET vk_common)
-    add_subdirectory(vk_cpp_common)
+if (NOT TARGET stonky_common)
+    add_subdirectory(stonky-cpp-common)
 endif ()
 
 set(HEADERS
@@ -77,4 +77,4 @@ else ()
     target_link_libraries(okx_test PRIVATE spdlog::spdlog_header_only okx_api)
 endif ()
 
-target_link_libraries(okx_api PRIVATE spdlog::spdlog_header_only OpenSSL::Crypto OpenSSL::SSL vk_common nlohmann_json::nlohmann_json MINIZIP::minizip)
+target_link_libraries(okx_api PRIVATE spdlog::spdlog_header_only OpenSSL::Crypto OpenSSL::SSL stonky_common nlohmann_json::nlohmann_json MINIZIP::minizip)
