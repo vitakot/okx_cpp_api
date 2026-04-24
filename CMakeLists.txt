@@ -42,17 +42,17 @@ if (NOT TARGET vk_common)
 endif ()
 
 set(HEADERS
-        include/vk/okx/okx.h
-        include/vk/okx/okx_enums.h
-        include/vk/okx/okx_models.h
-        include/vk/okx/okx_rest_client.h
-        include/vk/okx/okx_http_session.h
-        include/vk/okx/okx_event_models.h
-        include/vk/okx/okx_ws_client.h
-        include/vk/okx/okx_ws_session.h
-        include/vk/okx/okx_ws_stream_manager.h
-        include/vk/okx/okx_futures_exchange_connector.h
-        include/vk/okx/okx_market_data_utils.h
+        include/stonky/okx/okx.h
+        include/stonky/okx/okx_enums.h
+        include/stonky/okx/okx_models.h
+        include/stonky/okx/okx_rest_client.h
+        include/stonky/okx/okx_http_session.h
+        include/stonky/okx/okx_event_models.h
+        include/stonky/okx/okx_ws_client.h
+        include/stonky/okx/okx_ws_session.h
+        include/stonky/okx/okx_ws_stream_manager.h
+        include/stonky/okx/okx_futures_exchange_connector.h
+        include/stonky/okx/okx_market_data_utils.h
 )
 
 set(SOURCES
