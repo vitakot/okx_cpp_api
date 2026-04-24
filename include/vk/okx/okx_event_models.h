@@ -3,7 +3,7 @@ OKX Event Data Models
 
 Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 SPDX-License-Identifier: MIT
-Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@gmail.com>.
+Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
 #ifndef INCLUDE_VK_OKX_EVENT_MODELS_H
