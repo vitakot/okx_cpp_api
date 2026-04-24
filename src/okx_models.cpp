@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/okx/okx_models.h"
-#include "vk/utils/utils.h"
-#include "vk/utils/json_utils.h"
+#include "stonky/okx/okx_models.h"
+#include "stonky/utils/utils.h"
+#include "stonky/utils/json_utils.h"
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <utility>
 
-namespace vk::okx {
+namespace stonky::okx {
 bool
 readDecimalValue(const nlohmann::json &json, const std::string &key, boost::multiprecision::cpp_dec_float_50 &value,
                  boost::multiprecision::cpp_dec_float_50 defaultVal = boost::multiprecision::cpp_dec_float_50("0")) {

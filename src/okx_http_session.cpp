@@ -6,8 +6,8 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/okx/okx_http_session.h"
-#include "vk/utils/utils.h"
+#include "stonky/okx/okx_http_session.h"
+#include "stonky/utils/utils.h"
 #include "nlohmann/json.hpp"
 #include <boost/asio/ssl.hpp>
 #include <boost/beast/version.hpp>
@@ -15,7 +15,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include "date.h"
 #include <openssl/hmac.h>
 
-namespace vk::okx {
+namespace stonky::okx {
 namespace ssl = boost::asio::ssl;
 using tcp = net::ip::tcp;
 

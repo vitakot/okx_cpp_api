@@ -6,18 +6,18 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/okx/okx_rest_client.h"
-#include "vk/okx/okx_http_session.h"
-#include "vk/okx/okx.h"
-#include "vk/okx/okx_market_data_utils.h"
-#include "vk/utils/utils.h"
-#include "vk/utils/magic_enum_wrapper.hpp"
+#include "stonky/okx/okx_rest_client.h"
+#include "stonky/okx/okx_http_session.h"
+#include "stonky/okx/okx.h"
+#include "stonky/okx/okx_market_data_utils.h"
+#include "stonky/utils/utils.h"
+#include "stonky/utils/magic_enum_wrapper.hpp"
 #include <mutex>
 #include <thread>
 #include <deque>
 #include <spdlog/spdlog.h>
 
-namespace vk::okx {
+namespace stonky::okx {
 template<typename ValueType>
 ValueType handleOKXResponse(const http::response<http::string_body> &response) {
     ValueType retVal;
@@ -408,4 +408,4 @@ std::vector<Candle> RESTClient::downloadAndParseHistoricalCandles(
 
     return allCandles;
 }
-} // namespace vk::okx
+} // namespace stonky::okx

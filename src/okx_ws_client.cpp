@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/okx/okx_ws_client.h"
+#include "stonky/okx/okx_ws_client.h"
 #include <boost/beast/core.hpp>
 #include <thread>
 
 using namespace std::chrono_literals;
 
-namespace vk::okx {
+namespace stonky::okx {
 #define STRINGIZE_I(x) #x
 #define STRINGIZE(x) STRINGIZE_I(x)
 

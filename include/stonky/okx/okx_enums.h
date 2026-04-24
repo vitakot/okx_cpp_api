@@ -6,12 +6,12 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2026 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_OKX_ENUMS_H
-#define INCLUDE_VK_OKX_ENUMS_H
+#ifndef INCLUDE_STONKY_OKX_ENUMS_H
+#define INCLUDE_STONKY_OKX_ENUMS_H
 
-#include "vk/utils/magic_enum_wrapper.hpp"
+#include "stonky/utils/magic_enum_wrapper.hpp"
 
-namespace vk::okx {
+namespace stonky::okx {
 enum class InstrumentType : std::int32_t {
     SPOT,
     SWAP,
@@ -153,40 +153,40 @@ enum class DateAggrType : std::int32_t {
 }
 
 template<>
-constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<vk::okx::BarSize>(
-    const vk::okx::BarSize value) noexcept {
+constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<stonky::okx::BarSize>(
+    const stonky::okx::BarSize value) noexcept {
     switch (value) {
-        case vk::okx::BarSize::_1m:
+        case stonky::okx::BarSize::_1m:
             return "1m";
-        case vk::okx::BarSize::_3m:
+        case stonky::okx::BarSize::_3m:
             return "3m";
-        case vk::okx::BarSize::_5m:
+        case stonky::okx::BarSize::_5m:
             return "5m";
-        case vk::okx::BarSize::_15m:
+        case stonky::okx::BarSize::_15m:
             return "15m";
-        case vk::okx::BarSize::_30m:
+        case stonky::okx::BarSize::_30m:
             return "30m";
-        case vk::okx::BarSize::_1H:
+        case stonky::okx::BarSize::_1H:
             return "1H";
-        case vk::okx::BarSize::_2H:
+        case stonky::okx::BarSize::_2H:
             return "2H";
-        case vk::okx::BarSize::_4H:
+        case stonky::okx::BarSize::_4H:
             return "4H";
-        case vk::okx::BarSize::_6H:
+        case stonky::okx::BarSize::_6H:
             return "6H";
-        case vk::okx::BarSize::_12H:
+        case stonky::okx::BarSize::_12H:
             return "12H";
-        case vk::okx::BarSize::_1D:
+        case stonky::okx::BarSize::_1D:
             return "1D";
-        case vk::okx::BarSize::_2D:
+        case stonky::okx::BarSize::_2D:
             return "2D";
-        case vk::okx::BarSize::_3D:
+        case stonky::okx::BarSize::_3D:
             return "3D";
-        case vk::okx::BarSize::_1W:
+        case stonky::okx::BarSize::_1W:
             return "1W";
-        case vk::okx::BarSize::_1M:
+        case stonky::okx::BarSize::_1M:
             return "1M";
-        case vk::okx::BarSize::_3M:
+        case stonky::okx::BarSize::_3M:
             return "3M";
     }
 
@@ -194,17 +194,17 @@ constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<vk
 }
 
 template<>
-constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<vk::okx::PositionSide>(
-    const vk::okx::PositionSide value) noexcept {
+constexpr magic_enum::customize::customize_t magic_enum::customize::enum_name<stonky::okx::PositionSide>(
+    const stonky::okx::PositionSide value) noexcept {
     switch (value) {
-        case vk::okx::PositionSide::_long:
+        case stonky::okx::PositionSide::_long:
             return "long";
-        case vk::okx::PositionSide::_short:
+        case stonky::okx::PositionSide::_short:
             return "short";
-        case vk::okx::PositionSide::_net:
+        case stonky::okx::PositionSide::_net:
             return "net";
     }
 
     return default_tag;
 }
-#endif //INCLUDE_VK_OKX_ENUMS_H
+#endif //INCLUDE_STONKY_OKX_ENUMS_H

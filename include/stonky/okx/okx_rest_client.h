@@ -13,7 +13,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include <string>
 #include <memory>
 
-namespace vk::okx {
+namespace stonky::okx {
 
 using onCandlesDownloaded = std::function<void(const std::vector<Candle>&)>;
 

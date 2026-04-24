@@ -6,12 +6,12 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_OKX_API_OKX_H
-#define INCLUDE_VK_OKX_API_OKX_H
+#ifndef INCLUDE_STONKY_OKX_API_OKX_H
+#define INCLUDE_STONKY_OKX_API_OKX_H
 
-#include "vk/okx/okx_models.h"
+#include "stonky/okx/okx_models.h"
 
-namespace vk::okx {
+namespace stonky::okx {
 class OKX {
 public:
     /**
@@ -46,4 +46,4 @@ public:
     static BarSize candlestickChannelToBarSize(CandlestickChannel candlestickChannel);
 };
 }
-#endif //INCLUDE_VK_OKX_API_OKX_H
+#endif //INCLUDE_STONKY_OKX_API_OKX_H

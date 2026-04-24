@@ -6,14 +6,14 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_OKX_MARKET_DATA_UTILS_H
-#define INCLUDE_VK_OKX_MARKET_DATA_UTILS_H
+#ifndef INCLUDE_STONKY_OKX_MARKET_DATA_UTILS_H
+#define INCLUDE_STONKY_OKX_MARKET_DATA_UTILS_H
 
 #include "okx_models.h"
 #include <vector>
 #include <string>
 
-namespace vk::okx::utils {
+namespace stonky::okx::utils {
 
 /**
  * Extract first file from ZIP archive stored in memory
@@ -45,6 +45,6 @@ namespace vk::okx::utils {
  */
 [[nodiscard]] std::vector<FundingRate> parseFundingRateCsv(const std::vector<std::uint8_t> &csvData);
 
-} // namespace vk::okx::utils
+} // namespace stonky::okx::utils
 
-#endif // INCLUDE_VK_OKX_MARKET_DATA_UTILS_H
+#endif // INCLUDE_STONKY_OKX_MARKET_DATA_UTILS_H

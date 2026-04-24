@@ -6,11 +6,11 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/okx/okx_event_models.h"
-#include "vk/utils/utils.h"
-#include "vk/utils/json_utils.h"
+#include "stonky/okx/okx_event_models.h"
+#include "stonky/utils/utils.h"
+#include "stonky/utils/json_utils.h"
 
-namespace vk::okx {
+namespace stonky::okx {
 nlohmann::json WSSubscription::toJson() const {
     nlohmann::json json;
     json["channel"] = channel;

@@ -1,39 +1,39 @@
-#include "vk/okx/okx_rest_client.h"
-#include "vk/utils/json_utils.h"
-#include "vk/utils/log_utils.h"
-#include "vk/okx/okx_ws_stream_manager.h"
+#include "stonky/okx/okx_rest_client.h"
+#include "stonky/utils/json_utils.h"
+#include "stonky/utils/log_utils.h"
+#include "stonky/okx/okx_ws_stream_manager.h"
 #include <spdlog/spdlog.h>
 #include <filesystem>
 #include <iostream>
 #include <fstream>
 #include <future>
 
-#include "vk/interface/exchange_types.h"
-#include "vk/utils/semaphore.h"
+#include "stonky/interface/exchange_types.h"
+#include "stonky/utils/semaphore.h"
 
-using namespace vk::okx;
+using namespace stonky::okx;
 using namespace std::chrono_literals;
 
 constexpr int HISTORY_LENGTH_IN_S = 86400; // 1 day
 
-void logFunction(const vk::LogSeverity severity, const std::string &errmsg) {
+void logFunction(const stonky::LogSeverity severity, const std::string &errmsg) {
     switch (severity) {
-        case vk::LogSeverity::Info:
+        case stonky::LogSeverity::Info:
             spdlog::info(errmsg);
             break;
-        case vk::LogSeverity::Warning:
+        case stonky::LogSeverity::Warning:
             spdlog::warn(errmsg);
             break;
-        case vk::LogSeverity::Critical:
+        case stonky::LogSeverity::Critical:
             spdlog::critical(errmsg);
             break;
-        case vk::LogSeverity::Error:
+        case stonky::LogSeverity::Error:
             spdlog::error(errmsg);
             break;
-        case vk::LogSeverity::Debug:
+        case stonky::LogSeverity::Debug:
             spdlog::debug(errmsg);
             break;
-        case vk::LogSeverity::Trace:
+        case stonky::LogSeverity::Trace:
             spdlog::trace(errmsg);
             break;
     }
@@ -49,9 +49,9 @@ void readCredentials(std::string &apiKey, std::string &apiSecret, std::string &p
 
     try {
         nlohmann::json json = nlohmann::json::parse(ifs);
-        vk::readValue<std::string>(json, "ApiKey", apiKey);
-        vk::readValue<std::string>(json, "ApiSecret", apiSecret);
-        vk::readValue<std::string>(json, "PassPhrase", passPhrase);
+        stonky::readValue<std::string>(json, "ApiKey", apiKey);
+        stonky::readValue<std::string>(json, "ApiSecret", apiSecret);
+        stonky::readValue<std::string>(json, "PassPhrase", passPhrase);
     } catch (const std::exception &e) {
         std::cerr << e.what();
         ifs.close();
@@ -69,7 +69,7 @@ void testData() {
         const auto oldestDate = (std::chrono::seconds(std::time(nullptr)).count() - 60 * 200) * 1000;
         auto candles = restClient->getHistoricalPrices("ETH-USDT-SWAP", BarSize::_1m, oldestDate, nowTimestamp);
     } catch (std::exception &e) {
-        logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
+        logFunction(stonky::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
 
@@ -95,7 +95,7 @@ void testData() {
         auto t2 = high_resolution_clock::now();
 
         duration<double, std::milli> ms_double = t2 - t1;
-        logFunction(vk::LogSeverity::Info, fmt::format("Get Instruments request time: {} ms", ms_double.count()));
+        logFunction(stonky::LogSeverity::Info, fmt::format("Get Instruments request time: {} ms", ms_double.count()));
         overallTime += ms_double.count();
 
         t1 = high_resolution_clock::now();
@@ -103,7 +103,7 @@ void testData() {
         t2 = high_resolution_clock::now();
 
         ms_double = t2 - t1;
-        logFunction(vk::LogSeverity::Info,
+        logFunction(stonky::LogSeverity::Info,
                     fmt::format("Get Last Funding Rate request time: {} ms", ms_double.count()));
         overallTime += ms_double.count();
 
@@ -114,12 +114,12 @@ void testData() {
         t2 = high_resolution_clock::now();
 
         ms_double = t2 - t1;
-        logFunction(vk::LogSeverity::Info, fmt::format("Get Historical Prices: {} ms\n", ms_double.count()));
+        logFunction(stonky::LogSeverity::Info, fmt::format("Get Historical Prices: {} ms\n", ms_double.count()));
         overallTime += ms_double.count();
         numPass++;
 
         double timePerResponse = overallTime / (numPass * 3);
-        logFunction(vk::LogSeverity::Info, fmt::format("Average time per response: {} ms\n", timePerResponse));
+        logFunction(stonky::LogSeverity::Info, fmt::format("Average time per response: {} ms\n", timePerResponse));
 
         std::this_thread::sleep_for(2s);
     }
@@ -154,7 +154,7 @@ void testBalance() {
         const auto restClient = std::make_shared<RESTClient>(apiKey, apiSecret, passPhrase);
         auto balance = restClient->getBalance("");
     } catch (std::exception &e) {
-        logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
+        logFunction(stonky::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
 
@@ -167,7 +167,7 @@ void testInstruments() {
         const auto restClient = std::make_shared<RESTClient>(apiKey, apiSecret, passPhrase);
         auto instruments = restClient->getInstruments(InstrumentType::MARGIN);
     } catch (std::exception &e) {
-        logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
+        logFunction(stonky::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
 
@@ -180,7 +180,7 @@ void testPositions() {
         const auto restClient = std::make_shared<RESTClient>(apiKey, apiSecret, passPhrase);
         auto positions = restClient->getPositions(InstrumentType::MARGIN, "ADA-USDT");
     } catch (std::exception &e) {
-        logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
+        logFunction(stonky::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
 
@@ -203,7 +203,7 @@ void testOrders() {
 
         auto orderResponses = restClient->placeOrder(order);
     } catch (std::exception &e) {
-        logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
+        logFunction(stonky::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
 
@@ -230,18 +230,18 @@ void testFr() {
             auto t2 = high_resolution_clock::now();
 
             duration<double, std::milli> ms_double = t2 - t1;
-            logFunction(vk::LogSeverity::Info,
+            logFunction(stonky::LogSeverity::Info,
                         fmt::format("Get Last Funding Rate request time: {} ms", ms_double.count()));
             fRates.push_back(fr);
         }
     } catch (std::exception &e) {
-        logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
+        logFunction(stonky::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
 
 std::thread m_workerThread;
 
-std::vector<vk::FundingRate> parallelFR() {
+std::vector<stonky::FundingRate> parallelFR() {
     using std::chrono::high_resolution_clock;
     using std::chrono::duration_cast;
     using std::chrono::duration;
@@ -250,8 +250,8 @@ std::vector<vk::FundingRate> parallelFR() {
     const auto restClient = std::make_shared<RESTClient>("", "", "");
     const auto instruments = restClient->getInstruments(InstrumentType::SWAP);
 
-    std::vector<std::future<vk::FundingRate> > futures;
-    std::vector<vk::FundingRate> readyFutures;
+    std::vector<std::future<stonky::FundingRate> > futures;
+    std::vector<stonky::FundingRate> readyFutures;
 
     constexpr int numJobs = 3;
     Semaphore m_maxConcurrentJobs{numJobs};
@@ -265,7 +265,7 @@ std::vector<vk::FundingRate> parallelFR() {
         futures.push_back(
             std::async(std::launch::async,
                        [restClient, &requestsDone, t1
-                       ](const std::string &instId, Semaphore &maxJobs) -> vk::FundingRate {
+                       ](const std::string &instId, Semaphore &maxJobs) -> stonky::FundingRate {
                            std::scoped_lock w(maxJobs);
 
                            /// https://www.okx.com/docs-v5/en/#public-data-rest-api-get-funding-rate
@@ -281,7 +281,7 @@ std::vector<vk::FundingRate> parallelFR() {
                                    milliseconds(static_cast<int>(minMsPerRequest - msFr.count())));
                            }
 
-                           vk::FundingRate fundingRate = {
+                           stonky::FundingRate fundingRate = {
                                fr.instId, fr.fundingRate.convert_to<double>(), fr.nextFundingTime
                            };
 
@@ -313,9 +313,9 @@ void testFrSimple() {
     try {
         const auto restClient = std::make_shared<RESTClient>("", "", "");
         const auto fr = restClient->getLastFundingRate("BTC-USD-SWAP");
-        logFunction(vk::LogSeverity::Info, fmt::format("Last Funding Rate: {}", fr.fundingRate.convert_to<double>()));
+        logFunction(stonky::LogSeverity::Info, fmt::format("Last Funding Rate: {}", fr.fundingRate.convert_to<double>()));
     } catch (std::exception &e) {
-        logFunction(vk::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
+        logFunction(stonky::LogSeverity::Warning, fmt::format("Exception: {}", e.what()));
     }
 }
 

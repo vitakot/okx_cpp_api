@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/okx/okx_market_data_utils.h"
+#include "stonky/okx/okx_market_data_utils.h"
 #include <stdexcept>
 #include <sstream>
 #include <charconv>
@@ -18,7 +18,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include <set>
 #include <spdlog/spdlog.h>
 
-namespace vk::okx::utils {
+namespace stonky::okx::utils {
 
 std::vector<std::uint8_t> extractZip(const std::vector<std::uint8_t> &zipData) {
     // Create memory stream from input data
@@ -290,4 +290,4 @@ std::vector<FundingRate> parseFundingRateCsv(const std::vector<std::uint8_t> &cs
     return rates;
 }
 
-} // namespace vk::okx::utils
+} // namespace stonky::okx::utils

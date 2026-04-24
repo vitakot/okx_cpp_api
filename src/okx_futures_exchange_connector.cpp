@@ -7,15 +7,15 @@ Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
 #include <vk/okx/okx_futures_exchange_connector.h>
-#include "vk/okx/okx_rest_client.h"
-#include "vk/utils/semaphore.h"
+#include "stonky/okx/okx_rest_client.h"
+#include "stonky/utils/semaphore.h"
 
 using std::chrono::high_resolution_clock;
 using std::chrono::duration_cast;
 using std::chrono::duration;
 using std::chrono::milliseconds;
 
-namespace vk {
+namespace stonky {
 struct OKXFuturesExchangeConnector::P {
     std::unique_ptr<okx::RESTClient> restClient{};
     std::vector<FundingRate> fundingRates;
@@ -175,4 +175,4 @@ std::vector<FundingRate> OKXFuturesExchangeConnector::getHistoricalFundingRates(
 std::vector<Candle> OKXFuturesExchangeConnector::getHistoricalCandles(const std::string &symbol, CandleInterval interval, std::int64_t startTime, std::int64_t endTime) const {
     throw std::runtime_error("Unimplemented: OKXFuturesExchangeConnector::getHistoricalCandles");
 }
-} // namespace vk
+} // namespace stonky

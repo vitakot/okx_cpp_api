@@ -6,14 +6,14 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_OKX_EVENT_MODELS_H
-#define INCLUDE_VK_OKX_EVENT_MODELS_H
+#ifndef INCLUDE_STONKY_OKX_EVENT_MODELS_H
+#define INCLUDE_STONKY_OKX_EVENT_MODELS_H
 
-#include "vk/interface/i_json.h"
-#include "vk/okx/okx_models.h"
+#include "stonky/interface/i_json.h"
+#include "stonky/okx/okx_models.h"
 #include <nlohmann/json.hpp>
 
-namespace vk::okx {
+namespace stonky::okx {
 struct WSSubscription final : IJson {
     std::string channel{};
     std::string instId{};
@@ -71,4 +71,4 @@ struct DataEventTicker final : IJson {
     void fromJson(const nlohmann::json &json) override;
 };
 }
-#endif //INCLUDE_VK_OKX_EVENT_MODELS_H
+#endif //INCLUDE_STONKY_OKX_EVENT_MODELS_H

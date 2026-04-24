@@ -6,9 +6,9 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/okx/okx.h"
+#include "stonky/okx/okx.h"
 
-namespace vk::okx {
+namespace stonky::okx {
 int64_t OKX::numberOfMsForBarSize(const BarSize size) {
     switch (size) {
         case BarSize::_1m:

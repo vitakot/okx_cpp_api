@@ -6,15 +6,15 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_OKX_WS_STREAM_MANAGER_H
-#define INCLUDE_VK_OKX_WS_STREAM_MANAGER_H
+#ifndef INCLUDE_STONKY_OKX_WS_STREAM_MANAGER_H
+#define INCLUDE_STONKY_OKX_WS_STREAM_MANAGER_H
 
-#include "vk/utils/log_utils.h"
+#include "stonky/utils/log_utils.h"
 #include "okx_event_models.h"
 #include "okx_models.h"
 #include <optional>
 
-namespace vk::okx {
+namespace stonky::okx {
 class WSStreamManager {
     struct P;
     std::unique_ptr<P> m_p{};
@@ -75,4 +75,4 @@ public:
 };
 }
 
-#endif //INCLUDE_VK_OKX_WS_STREAM_MANAGER_H
+#endif //INCLUDE_STONKY_OKX_WS_STREAM_MANAGER_H

@@ -6,8 +6,8 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_OKX_HTTP_SESSION_H
-#define INCLUDE_VK_OKX_HTTP_SESSION_H
+#ifndef INCLUDE_STONKY_OKX_HTTP_SESSION_H
+#define INCLUDE_STONKY_OKX_HTTP_SESSION_H
 
 #include <boost/asio/connect.hpp>
 #include <boost/beast/core.hpp>
@@ -16,7 +16,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #include <map>
 #include <nlohmann/json_fwd.hpp>
 
-namespace vk::okx {
+namespace stonky::okx {
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace net = boost::asio;
@@ -41,5 +41,5 @@ public:
      */
     static std::vector<std::uint8_t> downloadBinary(const std::string &url);
 };
-} // namespace vk::okx
-#endif // INCLUDE_VK_OKX_HTTP_SESSION_H
+} // namespace stonky::okx
+#endif // INCLUDE_STONKY_OKX_HTTP_SESSION_H

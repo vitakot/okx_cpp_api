@@ -6,15 +6,15 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_OKX_MODELS_H
-#define INCLUDE_VK_OKX_MODELS_H
+#ifndef INCLUDE_STONKY_OKX_MODELS_H
+#define INCLUDE_STONKY_OKX_MODELS_H
 
-#include "vk/interface/i_json.h"
-#include "vk/okx/okx_enums.h"
+#include "stonky/interface/i_json.h"
+#include "stonky/okx/okx_enums.h"
 #include <nlohmann/json.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
-namespace vk::okx {
+namespace stonky::okx {
 struct Response : IJson {
     std::string code{};
     std::string msg{};
@@ -489,4 +489,4 @@ struct MarketDataHistory final : Response {
 };
 }
 
-#endif //INCLUDE_VK_OKX_MODELS_H
+#endif //INCLUDE_STONKY_OKX_MODELS_H

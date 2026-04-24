@@ -6,16 +6,16 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#ifndef INCLUDE_VK_OKX_WS_SESSION_H
-#define INCLUDE_VK_OKX_WS_SESSION_H
+#ifndef INCLUDE_STONKY_OKX_WS_SESSION_H
+#define INCLUDE_STONKY_OKX_WS_SESSION_H
 
-#include "vk/utils/log_utils.h"
+#include "stonky/utils/log_utils.h"
 #include "okx_event_models.h"
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <memory>
 
-namespace vk::okx {
+namespace stonky::okx {
 using onDataEvent = std::function<void(const DataEvent &event)>;
 
 class WebSocketSession final : public std::enable_shared_from_this<WebSocketSession> {
@@ -54,5 +54,5 @@ public:
      */
     [[nodiscard]] bool isSubscribed(const std::string &subscriptionRequest) const;
 };
-} // namespace vk::okx
-#endif // INCLUDE_VK_OKX_WS_SESSION_H
+} // namespace stonky::okx
+#endif // INCLUDE_STONKY_OKX_WS_SESSION_H

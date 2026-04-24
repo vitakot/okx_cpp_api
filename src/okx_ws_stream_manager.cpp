@@ -6,10 +6,10 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include "vk/okx/okx_rest_client.h"
-#include "vk/okx/okx_ws_stream_manager.h"
-#include "vk/okx/okx_ws_client.h"
-#include "vk/okx/okx.h"
+#include "stonky/okx/okx_rest_client.h"
+#include "stonky/okx/okx_ws_stream_manager.h"
+#include "stonky/okx/okx_ws_client.h"
+#include "stonky/okx/okx.h"
 #include <mutex>
 #include <thread>
 
@@ -21,7 +21,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 
 using namespace std::chrono_literals;
 
-namespace vk::okx {
+namespace stonky::okx {
 struct WSStreamManager::P {
     std::unique_ptr<WebSocketClient> wsClient;
     int timeout = 5;
