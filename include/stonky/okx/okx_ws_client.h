@@ -9,7 +9,7 @@ Copyright (c) 2025 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 #ifndef INCLUDE_STONKY_OKX_WS_CLIENT_H
 #define INCLUDE_STONKY_OKX_WS_CLIENT_H
 
-#include <vk/utils/log_utils.h>
+#include <stonky/utils/log_utils.h>
 #include "okx_ws_session.h"
 #include <string>
 

@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2022 Vitezslav Kot <vitezslav.kot@stonky.cz>, Stonky s.r.o.
 */
 
-#include <vk/okx/okx_futures_exchange_connector.h>
+#include <stonky/okx/okx_futures_exchange_connector.h>
 #include "stonky/okx/okx_rest_client.h"
 #include "stonky/utils/semaphore.h"
 
